@@ -1,0 +1,9 @@
+name: gabig-website
+region: fra
+static_sites:
+- name: website
+  github:
+    repo: gabiggmbh/website
+    branch: main
+    deploy_on_push: true
+  output_dir: /
