@@ -5,6 +5,36 @@
 <meta name="viewport" content="width=device-width,initial-scale=1" />
 <title>Gäbig — AI-Lagerlogistik aus der Schweiz</title>
 <meta name="description" content="Gäbig ist die AI-gestützte Lagersoftware aus der Schweiz: Pick-by-Light, ESL-Tags, automatischer Versand, Live-Marktplatz-Feeds. Demo in 30 Minuten." />
+<script>
+(function(){
+  var p = window.location.pathname;
+  var lang = /^\/fr(\/|$)/.test(p) ? 'fr' : 'de';
+  document.documentElement.lang = lang;
+  if(p === '/' || p === ''){
+    var nav = (navigator.language||'').toLowerCase();
+    location.replace((nav.startsWith('fr') ? '/fr' : '/de') + location.hash);
+    return;
+  }
+  var origin = window.location.origin;
+  var head = document.head;
+  ['de','fr'].forEach(function(l){
+    var lnk = document.createElement('link');
+    lnk.rel='alternate'; lnk.hreflang=l; lnk.href=origin+'/'+l;
+    head.appendChild(lnk);
+  });
+  var xd = document.createElement('link');
+  xd.rel='alternate'; xd.hreflang='x-default'; xd.href=origin+'/de';
+  head.appendChild(xd);
+  var canon = document.createElement('link');
+  canon.rel='canonical'; canon.href=origin+'/'+lang;
+  head.appendChild(canon);
+  if(lang==='fr'){
+    document.title='Gäbig — Logistique entrepôt AI, logiciel suisse';
+    var md=document.querySelector('meta[name="description"]');
+    if(md) md.content='Gäbig est le logiciel de gestion d\'entrepôt assisté par AI, made in Switzerland : Pick-by-Light, étiquettes ESL, expédition automatique, feeds marketplaces en direct. Démo en 30 minutes.';
+  }
+})();
+</script>
 <style>
   /* ============== tokens (verbatim from src/index.css) ============== */
   :root{
@@ -81,7 +111,8 @@
   nav.top .spacer{flex:1}
   nav.top .lang{display:flex;background:var(--n-100);border:1px solid var(--n-300);border-radius:99px;padding:3px;font-size:11px;font-weight:700;letter-spacing:.06em}
   nav.top .lang button{background:none;border:none;padding:5px 12px;border-radius:99px;cursor:pointer;color:var(--n-500);text-transform:uppercase;letter-spacing:.08em}
-  nav.top .lang button.active{background:var(--b-500);color:var(--n-100)}
+  html[lang="de"] nav.top .lang button[data-lang="de"],
+  html[lang="fr"] nav.top .lang button[data-lang="fr"]{background:var(--b-500);color:var(--n-100)}
   nav.top .cta{
     background:var(--b-500);color:var(--n-100);font-weight:700;font-size:13px;
     padding:10px 18px;border-radius:8px;border:none;cursor:pointer;letter-spacing:.02em;
@@ -466,7 +497,7 @@
     </div>
     <span class="spacer"></span>
     <div class="lang" role="group" aria-label="Sprache">
-      <button data-lang="de" class="active">DE</button>
+      <button data-lang="de">DE</button>
       <button data-lang="fr">FR</button>
     </div>
     <button class="cta" onclick="document.getElementById('demo').scrollIntoView({behavior:'smooth'})">
@@ -1305,20 +1336,11 @@
 
 <script>
   // ============== language toggle ==============
-  const langButtons = document.querySelectorAll('nav.top .lang button');
-  langButtons.forEach(b => b.addEventListener('click', () => {
-    const lang = b.dataset.lang;
-    document.documentElement.setAttribute('lang', lang);
-    langButtons.forEach(x => x.classList.toggle('active', x === b));
-    try{ localStorage.setItem('gabig.lang', lang); }catch(e){}
-  }));
-  try{
-    const saved = localStorage.getItem('gabig.lang');
-    if(saved){
-      document.documentElement.setAttribute('lang', saved);
-      langButtons.forEach(b => b.classList.toggle('active', b.dataset.lang === saved));
-    }
-  }catch(e){}
+  document.querySelectorAll('nav.top .lang button').forEach(b => {
+    b.addEventListener('click', () => {
+      window.location.href = '/' + b.dataset.lang + location.hash;
+    });
+  });
 
   // ============== nav scrolled state ==============
   const nav = document.getElementById('topNav');

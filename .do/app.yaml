@@ -7,3 +7,4 @@ static_sites:
     branch: main
     deploy_on_push: true
   output_dir: /
+  catchall_document: index.html
