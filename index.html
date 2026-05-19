@@ -1,0 +1,1380 @@
+<!doctype html>
+<html lang="de">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>Gäbig — AI-Lagerlogistik aus der Schweiz</title>
+<meta name="description" content="Gäbig ist die AI-gestützte Lagersoftware aus der Schweiz: Pick-by-Light, ESL-Tags, automatischer Versand, Live-Marktplatz-Feeds. Demo in 30 Minuten." />
+<style>
+  /* ============== tokens (verbatim from src/index.css) ============== */
+  :root{
+    --b-900:#1b0e58; --b-700:#36258e; --b-500:#6952dd; --b-400:#907eea;
+    --b-300:#ad9ff4; --b-200:#cec6f1; --b-100:#ddd8f8;
+    --n-900:#1a1816; --n-800:#262421; --n-700:#383530; --n-600:#4f4c47;
+    --n-500:#6b6860; --n-400:#c7bfaf; --n-300:#e3ded3; --n-200:#f2eee6;
+    --n-100:#fffcf7; --n-000:#ffffff;
+    --egg-100:#fffef7; --egg-200:#fffef0; --egg-300:#faf8e1; --egg-400:#f2f0ce;
+    --sec-500:#868e6f; --sec-300:#ced4be; --sec-100:#f2f4ea;
+    --sem-warning:#ff7435; --sem-success:#60bf30; --sem-error:#db3030; --sem-info:#21b5ff;
+    --p-a:#92F48C; --p-b:#FDF169; --p-c:#FFCA6E; --p-d:#FF8F6A; --p-e:#FF7CB5; --p-f:#9DE4F2;
+    --p-a-100:#D1FECE; --p-b-100:#FFFCDB; --p-c-100:#FFEDCE; --p-d-100:#FFD1C2; --p-e-100:#FFC5DE; --p-f-100:#EBFCFF;
+    --shadow-brand:2px 2px 4px rgba(120,100,220,.5);
+    --shadow-soft:0 1px 0 rgba(27,14,88,.04), 0 8px 32px -12px rgba(27,14,88,.12);
+  }
+
+  /* ============== fonts ============== */
+  @font-face{font-family:'Helvetica-Custom';src:url('assets/fonts/Helvetica-CondensedBold.ttf') format('truetype');font-weight:700;font-style:normal;font-display:swap}
+  @font-face{font-family:'Helvetica-Custom';src:url('assets/fonts/Helvetica-Light.otf') format('opentype');font-weight:300;font-style:normal;font-display:swap}
+  @font-face{font-family:'Helvetica-Custom';src:url('assets/fonts/Helvetica-Light.otf') format('opentype');font-weight:400;font-style:normal;font-display:swap}
+  @font-face{font-family:'Helvetica-Custom';src:url('assets/fonts/Helvetica-LightOblique.otf') format('opentype');font-weight:300;font-style:italic;font-display:swap}
+
+  /* ============== base ============== */
+  *,*::before,*::after{box-sizing:border-box}
+  html{scroll-behavior:smooth}
+  html,body{margin:0;padding:0}
+  body{
+    background:var(--egg-200);
+    color:var(--n-900);
+    font-family:'Helvetica-Custom','Helvetica Neue',Helvetica,Arial,sans-serif;
+    font-weight:300;
+    font-size:16px;
+    line-height:1.55;
+    -webkit-font-smoothing:antialiased;
+    overflow-x:hidden;
+  }
+  img{max-width:100%;display:block}
+  a{color:inherit;text-decoration:none}
+  button{font-family:inherit}
+  ::selection{background:var(--b-200);color:var(--b-900)}
+
+  h1,h2,h3,h4{margin:0;font-weight:700;letter-spacing:-.02em;color:var(--b-900);font-family:'Helvetica-Custom',Helvetica,Arial,sans-serif}
+  h1{font-size:clamp(40px,5.6vw,76px);line-height:.98;letter-spacing:-.035em}
+  h2{font-size:clamp(30px,3.4vw,46px);line-height:1.04;letter-spacing:-.025em}
+  h3{font-size:22px;line-height:1.15;letter-spacing:-.015em}
+  h4{font-size:11px;line-height:1.2;text-transform:uppercase;letter-spacing:.14em;color:var(--b-500);font-weight:700}
+  p{margin:0}
+  code{font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-size:.9em}
+
+  .wrap{max-width:1240px;margin:0 auto;padding:0 32px;width:100%}
+  .eyebrow{display:inline-flex;align-items:center;gap:10px;font-size:11px;text-transform:uppercase;letter-spacing:.16em;color:var(--b-500);font-weight:700}
+  .eyebrow .dot{width:7px;height:7px;background:var(--b-500);border-radius:50%}
+  .lede{font-size:19px;line-height:1.5;color:var(--n-700);font-weight:300;max-width:580px}
+  .num{font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-size:11px;letter-spacing:.06em;color:var(--b-500);font-weight:700}
+
+  /* ============== nav ============== */
+  nav.top{
+    position:sticky;top:0;z-index:50;
+    background:rgba(255,254,240,.86);
+    backdrop-filter:saturate(140%) blur(14px);
+    border-bottom:1px solid transparent;
+    transition:border-color .2s, background .2s;
+  }
+  nav.top.scrolled{border-bottom-color:var(--n-300);background:rgba(255,254,240,.94)}
+  nav.top .inner{max-width:1240px;margin:0 auto;padding:14px 32px;display:flex;align-items:center;gap:32px}
+  nav.top .logo{display:flex;align-items:center;gap:10px}
+  nav.top .logo .mark{width:26px;height:36px}
+  nav.top .logo .mark svg{width:100%;height:100%}
+  nav.top .logo .mark svg path{fill:var(--b-700)}
+  nav.top .links{display:flex;gap:28px;font-size:14px;color:var(--n-700);font-weight:400}
+  nav.top .links a{position:relative;padding:6px 0;transition:color .15s}
+  nav.top .links a:hover{color:var(--b-700)}
+  nav.top .spacer{flex:1}
+  nav.top .lang{display:flex;background:var(--n-100);border:1px solid var(--n-300);border-radius:99px;padding:3px;font-size:11px;font-weight:700;letter-spacing:.06em}
+  nav.top .lang button{background:none;border:none;padding:5px 12px;border-radius:99px;cursor:pointer;color:var(--n-500);text-transform:uppercase;letter-spacing:.08em}
+  nav.top .lang button.active{background:var(--b-500);color:var(--n-100)}
+  nav.top .cta{
+    background:var(--b-500);color:var(--n-100);font-weight:700;font-size:13px;
+    padding:10px 18px;border-radius:8px;border:none;cursor:pointer;letter-spacing:.02em;
+    box-shadow:var(--shadow-brand);transition:transform .15s, box-shadow .15s;
+  }
+  nav.top .cta:hover{background:var(--b-700);transform:translateY(-1px)}
+
+  /* ============== hero ============== */
+  section.hero{
+    position:relative;padding:72px 0 80px;
+    background:
+      radial-gradient(800px 500px at 90% -10%, rgba(105,82,221,.10), transparent 60%),
+      radial-gradient(700px 600px at -10% 20%, rgba(157,228,242,.18), transparent 50%);
+    overflow:hidden;
+  }
+  .hero-grid{display:grid;grid-template-columns:1.05fr 1fr;gap:64px;align-items:center}
+  .hero-copy .eyebrow{margin-bottom:24px}
+  .hero-copy h1{margin-bottom:24px}
+  .hero-copy h1 .accent{color:var(--b-500);font-style:italic;font-weight:300;letter-spacing:-.03em}
+  .hero-copy .lede{margin-bottom:28px;font-size:20px}
+  .hero-copy .actions{display:flex;gap:12px;align-items:center;flex-wrap:wrap;margin-bottom:34px}
+  .btn-primary{background:var(--b-500);color:var(--n-100);border:none;font-weight:700;font-size:15px;padding:14px 22px;border-radius:8px;cursor:pointer;letter-spacing:.01em;box-shadow:var(--shadow-brand);transition:transform .15s, background .15s;display:inline-flex;align-items:center;gap:8px}
+  .btn-primary:hover{background:var(--b-700);transform:translateY(-1px)}
+  .btn-ghost{background:transparent;color:var(--b-700);border:1px solid var(--n-300);font-weight:700;font-size:15px;padding:13px 20px;border-radius:8px;cursor:pointer;transition:background .15s, border-color .15s}
+  .btn-ghost:hover{background:var(--n-100);border-color:var(--b-300)}
+  .hero-stats{display:grid;grid-template-columns:repeat(3,1fr);gap:24px;border-top:1px solid var(--n-300);padding-top:24px;max-width:560px}
+  .hero-stats .item .v{font-family:'Helvetica-Custom';font-weight:700;font-size:28px;color:var(--b-900);letter-spacing:-.02em;line-height:1.05}
+  .hero-stats .item .v sup{font-size:14px;font-weight:300;color:var(--b-500);vertical-align:super;margin-left:2px}
+  .hero-stats .item .l{font-size:12px;color:var(--n-600);margin-top:4px;letter-spacing:.02em}
+
+  /* hero mockup */
+  .hero-mock{position:relative;height:540px}
+  .mock-card{position:absolute;background:var(--n-100);border:1px solid var(--n-300);border-radius:12px;box-shadow:var(--shadow-soft);overflow:hidden}
+  .mock-main{top:0;left:0;width:100%;height:100%;background:var(--n-100)}
+  .mock-main .mock-nav{height:38px;background:var(--n-800);display:flex;align-items:center;padding:0 14px;gap:8px;color:var(--n-100);font-size:11px}
+  .mock-main .mock-nav .dot-r{width:8px;height:8px;border-radius:50%;background:#ff5f56}
+  .mock-main .mock-nav .dot-y{width:8px;height:8px;border-radius:50%;background:#ffbd2e}
+  .mock-main .mock-nav .dot-g{width:8px;height:8px;border-radius:50%;background:#27c93f}
+  .mock-main .mock-nav .url{margin-left:16px;background:var(--n-700);padding:4px 10px;border-radius:4px;font-size:10.5px;color:var(--n-300);font-family:ui-monospace,monospace;display:flex;align-items:center;gap:6px}
+  .mock-main .mock-nav .url::before{content:'';width:7px;height:7px;border-radius:50%;background:var(--sem-success)}
+  .mock-main .mock-body{display:grid;grid-template-columns:170px 1fr;height:calc(100% - 38px)}
+  .mock-side{background:var(--n-200);padding:18px 14px;font-size:11.5px;color:var(--n-700);display:flex;flex-direction:column;gap:14px;border-right:1px solid var(--n-300)}
+  .mock-side .sect-label{font-size:9.5px;color:var(--n-500);text-transform:uppercase;letter-spacing:.14em;font-weight:700;margin-bottom:4px}
+  .mock-side .nav-item{padding:6px 8px;border-radius:5px;display:flex;align-items:center;gap:8px;font-size:12px}
+  .mock-side .nav-item .ic{width:13px;height:13px;border:1.4px solid currentColor;border-radius:3px;opacity:.6}
+  .mock-side .nav-item.active{background:var(--b-100);color:var(--b-900);font-weight:700;border-left:3px solid var(--b-500);padding-left:5px}
+  .mock-side .nav-item.active .ic{opacity:1;background:var(--b-500);border-color:var(--b-500)}
+  .mock-content{padding:18px;display:flex;flex-direction:column;gap:14px;overflow:hidden}
+  .mock-content .topbar{display:flex;justify-content:space-between;align-items:center}
+  .mock-content .topbar h5{font-size:15px;font-weight:700;color:var(--b-900);margin:0}
+  .mock-content .topbar .pill{background:var(--b-500);color:var(--n-100);padding:4px 10px;border-radius:6px;font-size:10.5px;font-weight:700}
+  .mock-stats{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
+  .mock-stat{background:var(--egg-200);border:1px solid var(--n-300);border-radius:6px;padding:8px 10px}
+  .mock-stat .l{font-size:9.5px;text-transform:uppercase;letter-spacing:.08em;color:var(--n-500);font-weight:700}
+  .mock-stat .v{font-family:'Helvetica-Custom';font-size:18px;font-weight:700;color:var(--b-900);margin-top:2px;letter-spacing:-.01em}
+  .mock-stat .v small{font-size:10px;color:var(--sem-success);font-weight:700;margin-left:4px}
+  .mock-table{flex:1;display:flex;flex-direction:column;gap:4px;font-size:11px}
+  .mock-table .head{display:grid;grid-template-columns:60px 1fr 70px 70px 60px;gap:8px;padding:6px 10px;color:var(--n-500);font-size:9px;text-transform:uppercase;letter-spacing:.08em;font-weight:700}
+  .mock-table .row{display:grid;grid-template-columns:60px 1fr 70px 70px 60px;gap:8px;align-items:center;padding:7px 10px;background:var(--n-100);border:1px solid var(--n-300);border-radius:5px;font-size:11px}
+  .mock-table .row .av{width:18px;height:18px;border-radius:50%;display:inline-flex;align-items:center;justify-content:center;font-size:9px;font-weight:700;color:var(--n-900)}
+  .mock-table .row .num{font-family:ui-monospace,monospace;color:var(--n-500);font-size:10px}
+  .mock-table .row .name{display:flex;align-items:center;gap:8px;color:var(--n-900);font-weight:700}
+  .mock-pill{display:inline-flex;align-items:center;gap:5px;padding:2px 8px;border-radius:99px;font-size:9.5px;font-weight:700}
+  .mock-pill .pdot{width:5px;height:5px;border-radius:50%}
+  .mock-pill.ok{background:var(--p-a-100);color:#1f5a18}
+  .mock-pill.ok .pdot{background:var(--sem-success)}
+  .mock-pill.warn{background:var(--p-c-100);color:#85481b}
+  .mock-pill.warn .pdot{background:var(--sem-warning)}
+  .mock-pill.info{background:var(--p-f-100);color:#0f5a73}
+  .mock-pill.info .pdot{background:var(--sem-info)}
+
+  /* floating cards */
+  .mock-float{position:absolute;background:var(--n-100);border:1px solid var(--n-300);border-radius:10px;padding:12px 14px;box-shadow:var(--shadow-soft);display:flex;align-items:center;gap:12px;font-size:12px;animation:floaty 5s ease-in-out infinite}
+  @keyframes floaty{0%,100%{transform:translateY(0)}50%{transform:translateY(-6px)}}
+  .mock-float.ai{top:18px;right:-28px;animation-delay:.2s;max-width:240px}
+  .mock-float.scan{bottom:-22px;left:-30px;animation-delay:1s}
+  .mock-float .ic{width:34px;height:34px;border-radius:8px;display:flex;align-items:center;justify-content:center;flex-shrink:0;font-size:18px}
+  .mock-float.ai .ic{background:var(--b-100);color:var(--b-700)}
+  .mock-float.scan .ic{background:var(--p-c-100);color:#85481b}
+  .mock-float .t1{font-weight:700;color:var(--b-900);font-size:12px;line-height:1.3}
+  .mock-float .t2{font-size:10.5px;color:var(--n-500);font-family:ui-monospace,monospace;margin-top:1px}
+  .mock-float .live{font-size:9px;color:var(--sem-success);font-weight:700;letter-spacing:.06em;display:flex;align-items:center;gap:4px;margin-top:3px}
+  .mock-float .live::before{content:'';width:5px;height:5px;border-radius:50%;background:var(--sem-success);box-shadow:0 0 0 2px rgba(96,191,48,.25);animation:pulse 1.5s ease-in-out infinite}
+  @keyframes pulse{0%,100%{opacity:1}50%{opacity:.5}}
+
+  /* ============== trust strip ============== */
+  section.trust{padding:48px 0;border-top:1px solid var(--n-300);border-bottom:1px solid var(--n-300);background:var(--egg-100)}
+  .trust-grid{display:flex;flex-direction:column;gap:24px;align-items:center}
+  .trust-grid .label{font-size:11px;text-transform:uppercase;letter-spacing:.18em;color:var(--n-500);font-weight:700}
+  .trust-logos{display:flex;flex-wrap:wrap;justify-content:center;align-items:center;gap:48px;width:100%}
+  .trust-logos .logo-i{font-family:'Helvetica-Custom';font-weight:700;font-size:18px;color:var(--n-600);letter-spacing:-.02em;opacity:.7;transition:opacity .2s, color .2s}
+  .trust-logos .logo-i:hover{opacity:1;color:var(--b-700)}
+  .trust-logos .logo-i sup{font-size:10px;font-weight:300;color:var(--b-500);vertical-align:super;margin-left:2px}
+  .trust-logos .logo-i .sw{display:inline-block;width:14px;height:14px;border-radius:3px;margin-right:8px;vertical-align:-2px}
+
+  /* ============== section base ============== */
+  section.block{padding:96px 0;position:relative}
+  .section-head{display:grid;grid-template-columns:60px 1fr;gap:32px;align-items:end;margin-bottom:48px;padding-bottom:24px;border-bottom:1px solid var(--n-300)}
+  .section-head .lead{display:flex;flex-direction:column;gap:14px;max-width:780px}
+  .section-head .lead .eyebrow{margin-bottom:0}
+  .section-head .lead .desc{font-size:17px;color:var(--n-700);line-height:1.5;font-weight:300;max-width:680px;margin-top:6px}
+
+  /* ============== problem ============== */
+  section.problem{background:var(--n-100);border-top:1px solid var(--n-300);border-bottom:1px solid var(--n-300)}
+  .pain-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:24px}
+  .pain{background:var(--egg-200);border:1px solid var(--n-300);border-radius:10px;padding:24px;position:relative;transition:transform .2s, box-shadow .2s}
+  .pain:hover{transform:translateY(-2px);box-shadow:var(--shadow-soft)}
+  .pain .ic{width:42px;height:42px;border-radius:10px;background:var(--n-200);display:flex;align-items:center;justify-content:center;margin-bottom:16px;color:var(--n-700);font-size:22px;line-height:1}
+  .pain h3{font-size:17px;margin-bottom:10px;color:var(--n-900)}
+  .pain p{font-size:14px;color:var(--n-600);line-height:1.5}
+  .pain .tag{position:absolute;top:18px;right:18px;font-size:9px;font-family:ui-monospace,monospace;color:var(--sem-error);letter-spacing:.06em;background:var(--p-d-100);padding:2px 7px;border-radius:99px;font-weight:700;text-transform:uppercase}
+
+  /* ============== features ============== */
+  section.features{background:var(--egg-200)}
+  .feat-grid{display:grid;grid-template-columns:repeat(6,1fr);gap:24px}
+  .feat{grid-column:span 2;background:var(--n-100);border:1px solid var(--n-300);border-radius:14px;padding:32px;display:flex;flex-direction:column;gap:16px;position:relative;overflow:hidden;transition:border-color .2s}
+  .feat:hover{border-color:var(--b-300)}
+  .feat.big{grid-column:span 3}
+  .feat .feat-head{display:flex;justify-content:space-between;align-items:flex-start}
+  .feat .num-tag{font-family:ui-monospace,monospace;font-size:10px;color:var(--b-500);font-weight:700;letter-spacing:.06em}
+  .feat h3{font-size:20px;color:var(--b-900);line-height:1.15;letter-spacing:-.015em}
+  .feat .feat-desc{font-size:14px;color:var(--n-600);line-height:1.55;flex:1}
+  .feat ul{padding:0;margin:0;list-style:none;display:flex;flex-direction:column;gap:6px;font-size:13px;color:var(--n-700)}
+  .feat ul li{padding-left:18px;position:relative}
+  .feat ul li::before{content:'';position:absolute;left:0;top:7px;width:9px;height:9px;border:1.6px solid var(--b-500);border-radius:50%;background:var(--b-100)}
+  .feat .feat-vis{margin-top:auto;padding-top:16px;border-top:1px solid var(--n-300)}
+
+  /* mini visualizations inside features */
+  .vis-pickbylight{display:flex;align-items:end;gap:6px;height:80px}
+  .vis-pickbylight .shelf{flex:1;background:var(--n-200);border:1px solid var(--n-300);border-radius:4px;position:relative;overflow:hidden}
+  .vis-pickbylight .shelf .light{position:absolute;left:50%;top:50%;width:14px;height:14px;border-radius:50%;background:var(--n-300);transform:translate(-50%,-50%)}
+  .vis-pickbylight .shelf.on{background:var(--p-c-100)}
+  .vis-pickbylight .shelf.on .light{background:var(--sem-warning);box-shadow:0 0 0 4px rgba(255,116,53,.22);animation:pulse 1.2s ease-in-out infinite}
+  .vis-feed{display:flex;flex-direction:column;gap:5px;font-family:ui-monospace,monospace;font-size:10.5px}
+  .vis-feed .row{display:flex;justify-content:space-between;padding:5px 8px;background:var(--n-100);border:1px solid var(--n-300);border-radius:4px;color:var(--n-700)}
+  .vis-feed .row .ok{color:var(--sem-success);font-weight:700}
+  .vis-feed .row .x{color:var(--n-500)}
+  .vis-flow{display:flex;align-items:center;gap:8px;font-size:11px;color:var(--n-600)}
+  .vis-flow .node{flex:1;background:var(--egg-200);border:1px solid var(--n-300);border-radius:6px;padding:8px 10px;text-align:center;font-weight:700;color:var(--b-900)}
+  .vis-flow .arr{color:var(--b-500);font-weight:700}
+  .vis-langs{display:flex;flex-wrap:wrap;gap:6px}
+  .vis-langs .chip{padding:4px 10px;border-radius:99px;background:var(--n-200);font-size:11px;color:var(--n-700);font-weight:700;border:1px solid var(--n-300)}
+  .vis-langs .chip.on{background:var(--b-500);color:var(--n-100);border-color:var(--b-500)}
+
+  /* ============== how it works ============== */
+  section.how{background:var(--n-100);border-top:1px solid var(--n-300);border-bottom:1px solid var(--n-300)}
+  .how-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:20px;position:relative}
+  .how-grid::before{content:'';position:absolute;left:32px;right:32px;top:48px;height:1px;background:repeating-linear-gradient(to right, var(--b-300) 0, var(--b-300) 4px, transparent 4px, transparent 10px);z-index:0}
+  .step{background:var(--egg-200);border:1px solid var(--n-300);border-radius:12px;padding:24px;display:flex;flex-direction:column;gap:14px;position:relative;z-index:1}
+  .step .step-n{width:32px;height:32px;border-radius:50%;background:var(--b-500);color:var(--n-100);display:flex;align-items:center;justify-content:center;font-weight:700;font-size:14px;font-family:'Helvetica-Custom';box-shadow:var(--shadow-brand)}
+  .step h3{font-size:18px;color:var(--b-900);line-height:1.2}
+  .step p{font-size:13.5px;color:var(--n-600);line-height:1.5}
+  .step .step-meta{font-size:11px;color:var(--n-500);font-family:ui-monospace,monospace;letter-spacing:.04em;margin-top:auto;padding-top:8px;border-top:1px dashed var(--n-300)}
+
+  /* ============== screenshots ============== */
+  section.shots{background:var(--egg-200);overflow:hidden}
+  .shots-stack{position:relative;height:580px;display:flex;justify-content:center;align-items:center;padding:0 32px}
+  .shot{position:absolute;background:var(--n-100);border:1px solid var(--n-300);border-radius:14px;overflow:hidden;box-shadow:var(--shadow-soft);width:880px;max-width:90vw;transition:transform .4s ease, opacity .3s, box-shadow .3s;cursor:pointer}
+  .shot .shot-nav{height:36px;background:var(--n-800);display:flex;align-items:center;padding:0 14px;gap:6px}
+  .shot .shot-nav .d{width:7px;height:7px;border-radius:50%}
+  .shot .shot-nav .d.r{background:#ff5f56}
+  .shot .shot-nav .d.y{background:#ffbd2e}
+  .shot .shot-nav .d.g{background:#27c93f}
+  .shot .shot-nav .title{margin-left:14px;color:var(--n-300);font-size:11px;letter-spacing:.04em}
+  .shot .shot-body{height:480px;background:var(--n-100);position:relative}
+  .shots-controls{display:flex;justify-content:center;gap:10px;margin-top:32px}
+  .shots-controls button{background:var(--n-100);border:1px solid var(--n-300);width:42px;height:10px;border-radius:99px;padding:0;cursor:pointer;transition:background .15s, width .15s}
+  .shots-controls button.active{background:var(--b-500);width:64px;border-color:var(--b-500)}
+
+  /* shot internals */
+  .shot-grid{display:grid;grid-template-columns:170px 1fr;height:100%}
+  .shot .sd{background:var(--n-200);padding:18px 14px;border-right:1px solid var(--n-300);display:flex;flex-direction:column;gap:8px;font-size:12px}
+  .shot .sd .lbl{font-size:9.5px;color:var(--n-500);text-transform:uppercase;letter-spacing:.12em;font-weight:700;margin-bottom:4px}
+  .shot .sd .it{padding:5px 8px;border-radius:5px;color:var(--n-700);font-size:12px}
+  .shot .sd .it.on{background:var(--b-100);color:var(--b-900);font-weight:700;border-left:3px solid var(--b-500);padding-left:5px}
+  .shot .sb{padding:24px;display:flex;flex-direction:column;gap:16px;overflow:hidden}
+  .shot .sb h6{margin:0;font-size:20px;color:var(--b-900);font-weight:700}
+  .shot .sb .sub{font-size:12px;color:var(--n-500)}
+
+  /* orders shot */
+  .ord-toolbar{display:flex;gap:10px;align-items:center;font-size:11.5px}
+  .ord-toolbar .filt{padding:5px 10px;background:var(--n-100);border:1px solid var(--n-300);border-radius:5px;color:var(--n-700);display:flex;align-items:center;gap:6px;font-weight:700}
+  .ord-toolbar .filt.on{background:var(--b-100);color:var(--b-700);border-color:var(--b-300)}
+  .ord-toolbar .new{margin-left:auto;background:var(--b-500);color:var(--n-100);padding:6px 14px;border-radius:6px;font-weight:700;font-size:11.5px}
+  .ord-table{display:flex;flex-direction:column;gap:5px;font-size:12px}
+  .ord-table .head{display:grid;grid-template-columns:75px 1fr 90px 90px 100px;gap:10px;padding:6px 12px;color:var(--n-500);font-size:9.5px;text-transform:uppercase;letter-spacing:.08em;font-weight:700}
+  .ord-table .row{display:grid;grid-template-columns:75px 1fr 90px 90px 100px;gap:10px;align-items:center;padding:9px 12px;background:var(--n-100);border:1px solid var(--n-300);border-radius:5px}
+  .ord-table .row:hover{background:var(--b-100);border-color:var(--b-200);cursor:pointer}
+  .ord-table .row .av{width:22px;height:22px;border-radius:50%;display:inline-flex;align-items:center;justify-content:center;font-size:9.5px;font-weight:700;color:var(--n-900);flex-shrink:0}
+  .ord-table .row .name{display:flex;align-items:center;gap:10px;color:var(--n-900);font-weight:700;font-size:12.5px}
+  .ord-table .row .meta-s{font-family:ui-monospace,monospace;color:var(--n-500);font-size:11px}
+
+  /* picklist shot */
+  .pick-grid{display:grid;grid-template-columns:1fr 280px;gap:20px;height:100%}
+  .pick-list{display:flex;flex-direction:column;gap:8px}
+  .pick-item{background:var(--n-100);border:1px solid var(--n-300);border-radius:8px;padding:12px 14px;display:flex;align-items:center;gap:14px}
+  .pick-item.active{background:var(--p-c-100);border-color:var(--p-c)}
+  .pick-item.done{opacity:.55}
+  .pick-item .chk{width:20px;height:20px;border-radius:50%;border:2px solid var(--n-400);flex-shrink:0;display:flex;align-items:center;justify-content:center}
+  .pick-item.done .chk{background:var(--sem-success);border-color:var(--sem-success);color:var(--n-100);font-size:12px;font-weight:700}
+  .pick-item.done .chk::before{content:'✓'}
+  .pick-item .info{flex:1;min-width:0}
+  .pick-item .info .t{font-weight:700;color:var(--b-900);font-size:13px;margin-bottom:2px}
+  .pick-item .info .s{font-size:11px;color:var(--n-600);font-family:ui-monospace,monospace}
+  .pick-item .loc{font-family:ui-monospace,monospace;font-size:11.5px;color:var(--n-700);background:var(--n-200);padding:4px 8px;border-radius:4px;font-weight:700}
+  .pick-item.active .loc{background:var(--sem-warning);color:var(--n-100)}
+  .pick-side{background:var(--n-100);border:1px solid var(--n-300);border-radius:10px;padding:18px;display:flex;flex-direction:column;gap:14px}
+  .pick-side h6{margin:0;font-size:14px;color:var(--b-900);font-weight:700}
+  .pick-map{flex:1;background:var(--egg-200);border:1px solid var(--n-300);border-radius:6px;padding:12px;position:relative;display:grid;grid-template-columns:repeat(5,1fr);gap:4px}
+  .pick-map .cell{aspect-ratio:1;background:var(--n-200);border:1px solid var(--n-300);border-radius:3px;font-size:9px;color:var(--n-500);font-family:ui-monospace,monospace;display:flex;align-items:center;justify-content:center;font-weight:700}
+  .pick-map .cell.path{background:var(--b-100);border-color:var(--b-300)}
+  .pick-map .cell.stop{background:var(--sem-warning);color:var(--n-100);border-color:var(--sem-warning)}
+  .pick-map .cell.start{background:var(--b-500);color:var(--n-100);border-color:var(--b-500)}
+
+  /* inventory shot */
+  .inv-stats{display:grid;grid-template-columns:repeat(4,1fr);gap:10px}
+  .inv-stat{background:var(--n-100);border:1px solid var(--n-300);border-radius:8px;padding:14px}
+  .inv-stat .l{font-size:9.5px;text-transform:uppercase;letter-spacing:.1em;color:var(--n-500);font-weight:700;margin-bottom:6px}
+  .inv-stat .v{font-family:'Helvetica-Custom';font-size:22px;font-weight:700;color:var(--b-900)}
+  .inv-stat .d{font-size:10px;color:var(--sem-success);font-weight:700;margin-top:2px}
+  .inv-stat .d.neg{color:var(--sem-error)}
+  .inv-chart{flex:1;background:var(--n-100);border:1px solid var(--n-300);border-radius:8px;padding:18px;display:flex;flex-direction:column;gap:14px}
+  .inv-chart h6{margin:0;font-size:14px;color:var(--b-900)}
+  .inv-bars{flex:1;display:flex;align-items:end;gap:8px;padding-top:14px;border-top:1px dashed var(--n-300)}
+  .inv-bars .bar{flex:1;background:linear-gradient(to top, var(--b-500), var(--b-400));border-radius:3px 3px 0 0;position:relative;min-height:12px}
+  .inv-bars .bar.alt{background:linear-gradient(to top, var(--p-c), var(--p-c-100))}
+  .inv-bars .bar::after{content:attr(data-l);position:absolute;left:50%;bottom:-18px;transform:translateX(-50%);font-size:9px;color:var(--n-500);font-family:ui-monospace,monospace}
+
+  /* ============== AI chat ============== */
+  section.aichat{background:var(--egg-300);border-top:1px solid var(--n-300);border-bottom:1px solid var(--n-300)}
+  .ai-grid{display:grid;grid-template-columns:1fr 420px;gap:64px;align-items:center}
+  .ai-copy h2{margin-bottom:18px}
+  .ai-copy .desc{font-size:17px;color:var(--n-700);line-height:1.5;margin-bottom:24px;max-width:520px}
+  .ai-copy .channels{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:24px}
+  .ai-copy .channel{padding:6px 12px;background:var(--n-100);border:1px solid var(--n-300);border-radius:99px;font-size:12px;font-weight:700;color:var(--n-700);display:flex;align-items:center;gap:6px}
+  .ai-copy .channel .d{width:8px;height:8px;border-radius:50%;background:var(--sem-success)}
+  .ai-copy ul.commands{padding:0;margin:0;list-style:none;display:flex;flex-direction:column;gap:8px;max-width:480px}
+  .ai-copy ul.commands li{display:flex;gap:14px;align-items:flex-start;font-size:14px;color:var(--n-700);padding:10px 14px;background:var(--n-100);border:1px solid var(--n-300);border-radius:8px}
+  .ai-copy ul.commands li code{background:var(--b-100);color:var(--b-700);padding:2px 7px;border-radius:4px;font-size:12px;font-weight:700;flex-shrink:0}
+
+  .ai-phone{background:var(--n-100);border-radius:24px;border:1px solid var(--n-300);box-shadow:var(--shadow-soft);overflow:hidden;display:flex;flex-direction:column;min-height:520px}
+  .ai-phone .ai-head{background:#517DA2;color:#fff;padding:14px 16px;display:flex;align-items:center;gap:12px}
+  .ai-phone .ai-head .av{width:36px;height:36px;border-radius:50%;background:var(--b-500);color:#fff;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:13px;font-family:'Helvetica-Custom'}
+  .ai-phone .ai-head .n{font-size:14px;font-weight:700}
+  .ai-phone .ai-head .s{font-size:11px;opacity:.8}
+  .ai-phone .ai-body{flex:1;background:#E7EBF0;background-image:radial-gradient(circle at 20% 20%, rgba(255,255,255,.5) 1px, transparent 1px);background-size:18px 18px;padding:18px 14px;display:flex;flex-direction:column;gap:10px;font-size:13px}
+  .bubble{padding:8px 12px;border-radius:10px;max-width:80%;line-height:1.4;position:relative;box-shadow:0 1px 1px rgba(0,0,0,.06)}
+  .bubble.me{background:#EFFDDE;align-self:flex-end;border-bottom-right-radius:2px}
+  .bubble.ai{background:#fff;align-self:flex-start;border-bottom-left-radius:2px}
+  .bubble .ts{font-size:9.5px;color:var(--n-500);margin-top:4px;display:block;text-align:right}
+  .bubble code{font-family:ui-monospace,monospace;font-size:11.5px;background:rgba(0,0,0,.04);padding:1px 5px;border-radius:3px}
+  .bubble.ai .meta{margin-top:8px;padding:8px;background:var(--n-100);border-radius:6px;border-left:3px solid var(--b-500);font-size:11.5px;color:var(--n-700)}
+  .bubble.ai .meta strong{color:var(--b-900)}
+
+  /* ============== swiss made ============== */
+  section.swiss{background:var(--n-100);border-bottom:1px solid var(--n-300)}
+  .swiss-grid{display:grid;grid-template-columns:1.2fr 1fr;gap:64px;align-items:center}
+  .swiss-copy h2{margin-bottom:20px}
+  .swiss-copy h2 .accent{color:var(--sem-error);font-weight:700}
+  .swiss-copy p{font-size:17px;color:var(--n-700);line-height:1.55;margin-bottom:16px;max-width:560px}
+  .swiss-facts{display:grid;grid-template-columns:repeat(2,1fr);gap:14px;margin-top:24px;max-width:520px}
+  .swiss-fact{padding:14px 16px;background:var(--egg-200);border:1px solid var(--n-300);border-radius:8px}
+  .swiss-fact .l{font-size:10.5px;text-transform:uppercase;letter-spacing:.1em;color:var(--n-500);font-weight:700;margin-bottom:4px}
+  .swiss-fact .v{font-family:'Helvetica-Custom';font-size:20px;font-weight:700;color:var(--b-900);letter-spacing:-.015em}
+  .swiss-map{background:var(--egg-200);border:1px solid var(--n-300);border-radius:14px;padding:32px;position:relative;aspect-ratio:1.05;display:flex;flex-direction:column;justify-content:space-between;overflow:hidden}
+  .swiss-map .ch-cross{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);width:60%;aspect-ratio:1;background:var(--sem-error);border-radius:8px;opacity:.06}
+  .swiss-map .ch-cross::before,.swiss-map .ch-cross::after{content:'';position:absolute;background:var(--sem-error);border-radius:6px}
+  .swiss-map .ch-cross::before{top:30%;bottom:30%;left:10%;right:10%}
+  .swiss-map .ch-cross::after{left:30%;right:30%;top:10%;bottom:10%}
+  .swiss-map .top-l{position:relative;z-index:2}
+  .swiss-map .top-l .pin{display:inline-flex;align-items:center;gap:8px;background:var(--n-100);border:1px solid var(--n-300);padding:8px 12px;border-radius:99px;font-size:12px;font-weight:700;color:var(--b-900);box-shadow:var(--shadow-soft)}
+  .swiss-map .top-l .pin .d{width:8px;height:8px;border-radius:50%;background:var(--sem-error);box-shadow:0 0 0 3px rgba(219,48,48,.18);animation:pulse 1.8s ease-in-out infinite}
+  .swiss-map .bottom{position:relative;z-index:2;font-family:'Helvetica-Custom';font-weight:700;font-size:18px;color:var(--n-700);line-height:1.2;text-align:right}
+  .swiss-map .bottom strong{display:block;color:var(--b-900);font-size:32px;letter-spacing:-.02em}
+
+  /* ============== demo form ============== */
+  section.demo{background:linear-gradient(180deg, var(--egg-200) 0%, var(--egg-300) 100%);position:relative}
+  .demo-grid{display:grid;grid-template-columns:1fr 1.1fr;gap:64px}
+  .demo-copy h2{margin-bottom:18px;font-size:clamp(34px,3.8vw,52px)}
+  .demo-copy .lede{font-size:18px;margin-bottom:32px;max-width:480px}
+  .demo-copy ul.expect{padding:0;margin:0;list-style:none;display:flex;flex-direction:column;gap:14px;max-width:440px}
+  .demo-copy ul.expect li{display:flex;gap:14px;align-items:flex-start;font-size:15px;color:var(--n-700);line-height:1.4}
+  .demo-copy ul.expect li .n{flex-shrink:0;width:24px;height:24px;border-radius:50%;background:var(--b-100);color:var(--b-700);display:flex;align-items:center;justify-content:center;font-weight:700;font-size:11px;font-family:'Helvetica-Custom';margin-top:1px}
+  .demo-copy ul.expect li strong{color:var(--b-900);font-weight:700}
+  .demo-card{background:var(--n-100);border:1px solid var(--n-300);border-radius:14px;padding:36px;box-shadow:var(--shadow-soft)}
+  .demo-card h3{font-size:24px;margin-bottom:6px;color:var(--b-900);font-weight:700}
+  .demo-card .sub{font-size:14px;color:var(--n-600);margin-bottom:24px}
+  .form-grid{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+  .field{display:flex;flex-direction:column;gap:6px;position:relative}
+  .field.full{grid-column:span 2}
+  .field label{font-size:11px;text-transform:uppercase;letter-spacing:.1em;color:var(--n-700);font-weight:700}
+  .field label .req{color:var(--sem-error);margin-left:2px}
+  .field input, .field select, .field textarea{
+    border:1px solid var(--n-300);background:var(--n-100);color:var(--n-900);
+    padding:11px 13px;border-radius:6px;font-family:inherit;font-size:14px;font-weight:300;
+    outline:none;transition:border-color .15s, box-shadow .15s;
+  }
+  .field input::placeholder, .field textarea::placeholder{color:var(--n-400)}
+  .field input:focus, .field select:focus, .field textarea:focus{border-color:var(--b-500);box-shadow:0 0 0 3px var(--b-100)}
+  .field select{appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6' viewBox='0 0 10 6'%3E%3Cpath fill='%236b6860' d='M0 0l5 6 5-6z'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 14px center;padding-right:36px}
+  .form-submit{margin-top:18px;display:flex;flex-direction:column;gap:12px}
+  .form-submit .btn-primary{justify-content:center;font-size:15px;padding:14px}
+  .form-submit .fine{font-size:11px;color:var(--n-500);text-align:center;line-height:1.4}
+
+  /* ============== footer ============== */
+  footer{background:var(--n-900);color:var(--n-300);padding:64px 0 32px}
+  .foot-grid{display:grid;grid-template-columns:1.4fr 1fr 1fr 1fr;gap:48px;margin-bottom:48px}
+  footer .brand-blk .lg{display:flex;align-items:center;gap:10px;margin-bottom:18px}
+  footer .brand-blk .lg .mark{width:22px;height:30px}
+  footer .brand-blk .lg .mark svg path{fill:var(--n-100)}
+  footer .brand-blk .lg .wm{height:24px}
+  footer .brand-blk .lg .wm svg{height:100%}
+  footer .brand-blk .lg .wm svg path{fill:var(--n-100)}
+  footer .brand-blk p{font-size:13px;line-height:1.5;color:var(--n-400);max-width:280px;margin-bottom:18px}
+  footer .brand-blk .addr{font-size:12.5px;color:var(--n-500);font-style:normal;line-height:1.6}
+  footer .brand-blk .addr a{color:var(--n-300)}
+  footer h5{font-size:11px;text-transform:uppercase;letter-spacing:.14em;font-weight:700;color:var(--n-100);margin:0 0 16px}
+  footer ul{padding:0;margin:0;list-style:none;display:flex;flex-direction:column;gap:10px;font-size:13px}
+  footer ul a{color:var(--n-400);transition:color .15s}
+  footer ul a:hover{color:var(--n-100)}
+  .foot-bottom{border-top:1px solid var(--n-700);padding-top:24px;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:12px;font-size:11.5px;color:var(--n-500)}
+  .foot-bottom .badges{display:flex;gap:14px;font-size:10.5px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--n-400)}
+  .foot-bottom .badges span{display:inline-flex;align-items:center;gap:6px}
+  .foot-bottom .badges span::before{content:'';width:6px;height:6px;border-radius:50%;background:var(--sem-success)}
+
+  /* ============== reveal ============== */
+  .reveal{opacity:0;transform:translateY(20px);transition:opacity .7s ease, transform .7s ease}
+  .reveal.in{opacity:1;transform:translateY(0)}
+
+  /* ============== language ============== */
+  [data-fr]{display:none}
+  html[lang="fr"] [data-de]{display:none}
+  html[lang="fr"] [data-fr]{display:revert}
+
+  /* ============== responsive ============== */
+  @media (max-width:1000px){
+    .hero-grid{grid-template-columns:1fr;gap:40px}
+    .hero-mock{height:480px}
+    .hero-stats{max-width:none}
+    .pain-grid{grid-template-columns:repeat(2,1fr)}
+    .feat-grid{grid-template-columns:repeat(2,1fr)}
+    .feat, .feat.big{grid-column:span 1}
+    .how-grid{grid-template-columns:repeat(2,1fr)}
+    .how-grid::before{display:none}
+    .ai-grid, .swiss-grid, .demo-grid{grid-template-columns:1fr;gap:40px}
+    .foot-grid{grid-template-columns:repeat(2,1fr);gap:32px}
+    nav.top .links{display:none}
+    .section-head{grid-template-columns:1fr;gap:14px}
+    .mock-float.ai{right:-8px;top:8px}
+    .mock-float.scan{left:-8px}
+  }
+  @media (max-width:600px){
+    .wrap{padding:0 20px}
+    nav.top .inner{padding:12px 20px;gap:14px}
+    section.hero{padding:48px 0 56px}
+    section.block{padding:64px 0}
+    .hero-stats{grid-template-columns:1fr 1fr;gap:16px}
+    .pain-grid, .feat-grid, .how-grid{grid-template-columns:1fr}
+    .form-grid{grid-template-columns:1fr}
+    .field.full{grid-column:span 1}
+    .foot-grid{grid-template-columns:1fr}
+    .shots-stack{padding:0}
+    .shot{width:100%}
+  }
+</style>
+</head>
+<body>
+
+<!-- ============== NAV ============== -->
+<nav class="top" id="topNav">
+  <div class="inner">
+    <a href="#top" class="logo">
+      <span class="mark"><svg viewBox="0 0 29 42" xmlns="http://www.w3.org/2000/svg"><path d="M15.39 10.7C22.9 10.7 26.68 14.6 26.68 14.6L23.23 19.98C23.23 19.98 20.23 17.27 16.09 17.27C9.93 17.27 7.43 21.21 7.43 25.56C7.43 31.14 11.29 34.47 15.85 34.47C19.3 34.47 21.8 32.34 21.8 32.34V30.08H17.65V23.96H28.16V40.55H22.17V39.73C22.17 39.11 22.21 38.5 22.21 38.5H22.13C22.13 38.5 19.3 41.05 14.41 41.05C6.9 41.05 0 35.43 0 25.82C0 17.28 6.45 10.71 15.39 10.71V10.7Z"/><path d="M27.72 4.32996V6.54996H1.71997V4.32996H27.72Z"/><path d="M27.72 0V2.22H1.71997V0H27.72Z"/></svg></span>
+      <span style="font-family:'Helvetica-Custom';font-weight:700;font-size:22px;color:var(--b-900);letter-spacing:-.02em">gäbig</span>
+    </a>
+    <div class="links">
+      <a href="#features"><span data-de>Funktionen</span><span data-fr>Fonctions</span></a>
+      <a href="#how"><span data-de>So funktioniert's</span><span data-fr>Fonctionnement</span></a>
+      <a href="#screenshots"><span data-de>Produkt</span><span data-fr>Produit</span></a>
+      <a href="#swiss"><span data-de>Über uns</span><span data-fr>À propos</span></a>
+      <a href="#demo" data-de>Demo</a>
+    </div>
+    <span class="spacer"></span>
+    <div class="lang" role="group" aria-label="Sprache">
+      <button data-lang="de" class="active">DE</button>
+      <button data-lang="fr">FR</button>
+    </div>
+    <button class="cta" onclick="document.getElementById('demo').scrollIntoView({behavior:'smooth'})">
+      <span data-de>Demo buchen</span><span data-fr>Réserver démo</span>
+    </button>
+  </div>
+</nav>
+
+<!-- ============== HERO ============== -->
+<section class="hero" id="top">
+  <div class="wrap">
+    <div class="hero-grid">
+      <div class="hero-copy reveal in">
+        <div class="eyebrow"><span class="dot"></span>
+          <span data-de>AI-Lagerlogistik · Schweizer Software</span>
+          <span data-fr>Logistique AI · Logiciel suisse</span>
+        </div>
+        <h1>
+          <span data-de>Einfach.<br/>Smart.<br/><span class="accent">Gäbig.</span></span>
+          <span data-fr data-fr-block>Simple.<br/>Smart.<br/><span class="accent">Gäbig.</span></span>
+        </h1>
+        <p class="lede">
+          <span data-de>AI-gestützte Lagerlogistik aus der Schweiz. Pick-by-Light, ESL-Tags, Live-Marktplatz-Feeds und automatischer Versand — alles in einer browser&shy;basierten Plattform. Keine Spezial&shy;hardware.</span>
+          <span data-fr>Logistique d'entrepôt assistée par AI, made in Switzerland. Pick-by-Light, étiquettes ESL, feeds marketplaces et expédition automatique — dans une plateforme web. Sans matériel spécial.</span>
+        </p>
+        <div class="actions">
+          <button class="btn-primary" onclick="document.getElementById('demo').scrollIntoView({behavior:'smooth'})">
+            <span data-de>30-Min Demo buchen</span><span data-fr>Réserver démo 30 min</span>
+            <span style="font-size:18px;line-height:1">→</span>
+          </button>
+          <button class="btn-ghost" onclick="document.getElementById('how').scrollIntoView({behavior:'smooth'})">
+            <span data-de>So funktioniert's</span><span data-fr>Voir comment ça marche</span>
+          </button>
+        </div>
+        <div class="hero-stats">
+          <div class="item"><div class="v">15<sup>min</sup></div><div class="l" data-de>Marktplatz-Feed Refresh</div><div class="l" data-fr>Rafraîchissement feed</div></div>
+          <div class="item"><div class="v">−42<sup>%</sup></div><div class="l" data-de>Kürzere Picking-Wege</div><div class="l" data-fr>Trajets de picking</div></div>
+          <div class="item"><div class="v">100<sup>%</sup></div><div class="l" data-de>Web-basiert, kein Setup</div><div class="l" data-fr>Web, zéro installation</div></div>
+        </div>
+      </div>
+
+      <!-- hero mockup -->
+      <div class="hero-mock reveal in">
+        <div class="mock-card mock-main">
+          <div class="mock-nav">
+            <span class="dot-r"></span><span class="dot-y"></span><span class="dot-g"></span>
+            <span class="url">app.gabig.ch/orders</span>
+          </div>
+          <div class="mock-body">
+            <div class="mock-side">
+              <div>
+                <div class="sect-label"><span data-de>Verkauf</span><span data-fr>Ventes</span></div>
+                <div class="nav-item active"><span class="ic"></span><span data-de>Bestellungen</span><span data-fr>Commandes</span></div>
+                <div class="nav-item"><span class="ic"></span>Picklist</div>
+                <div class="nav-item"><span class="ic"></span><span data-de>Versand</span><span data-fr>Expédition</span></div>
+                <div class="nav-item"><span class="ic"></span><span data-de>Retouren</span><span data-fr>Retours</span></div>
+              </div>
+              <div>
+                <div class="sect-label"><span data-de>Lager</span><span data-fr>Entrepôt</span></div>
+                <div class="nav-item"><span class="ic"></span><span data-de>Bestand</span><span data-fr>Stock</span></div>
+                <div class="nav-item"><span class="ic"></span><span data-de>Lagerplätze</span><span data-fr>Emplacements</span></div>
+              </div>
+            </div>
+            <div class="mock-content">
+              <div class="topbar">
+                <h5><span data-de>Offene Bestellungen</span><span data-fr>Commandes ouvertes</span></h5>
+                <span class="pill"><span data-de>+ Neu</span><span data-fr>+ Nouveau</span></span>
+              </div>
+              <div class="mock-stats">
+                <div class="mock-stat"><div class="l"><span data-de>Heute</span><span data-fr>Auj.</span></div><div class="v">128 <small>↑ 12%</small></div></div>
+                <div class="mock-stat"><div class="l">Pending</div><div class="v">42</div></div>
+                <div class="mock-stat"><div class="l">CHF</div><div class="v">38'420</div></div>
+              </div>
+              <div class="mock-table">
+                <div class="head">
+                  <span data-de>Datum</span><span data-fr>Date</span><span data-de>Kunde</span><span data-fr>Client</span><span>Status</span><span>Total</span><span>SLA</span>
+                </div>
+                <div class="row">
+                  <span class="num">12.05</span>
+                  <span class="name"><span class="av" style="background:#92F48C">MA</span>Müller AG</span>
+                  <span><span class="mock-pill ok"><span class="pdot"></span>Paid</span></span>
+                  <span class="num">CHF 248</span>
+                  <span class="num">2h</span>
+                </div>
+                <div class="row">
+                  <span class="num">12.05</span>
+                  <span class="name"><span class="av" style="background:#FFCA6E">BR</span>Bäckerei Roth</span>
+                  <span><span class="mock-pill warn"><span class="pdot"></span>Open</span></span>
+                  <span class="num">CHF 89</span>
+                  <span class="num">4h</span>
+                </div>
+                <div class="row">
+                  <span class="num">11.05</span>
+                  <span class="name"><span class="av" style="background:#FF7CB5">GK</span>Garage Keller</span>
+                  <span><span class="mock-pill info"><span class="pdot"></span>Ship</span></span>
+                  <span class="num">CHF 1'204</span>
+                  <span class="num">24h</span>
+                </div>
+                <div class="row">
+                  <span class="num">11.05</span>
+                  <span class="name"><span class="av" style="background:#9DE4F2">AT</span>Atelier Tobler</span>
+                  <span><span class="mock-pill ok"><span class="pdot"></span>Paid</span></span>
+                  <span class="num">CHF 412</span>
+                  <span class="num">6h</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- floating AI card -->
+        <div class="mock-float ai">
+          <div class="ic">◐</div>
+          <div>
+            <div class="t1" data-de>AI: 3 Nachbestellungen vorgeschlagen</div>
+            <div class="t1" data-fr>AI: 3 réassorts suggérés</div>
+            <div class="t2">SKU-449128 · −67% · 9 Tage</div>
+          </div>
+        </div>
+
+        <!-- floating scanner card -->
+        <div class="mock-float scan">
+          <div class="ic">⌕</div>
+          <div>
+            <div class="t1">Pick-by-Light · Pos. B-04-12</div>
+            <div class="t2">Zebra DS22-08 · 12s ago</div>
+            <div class="live"><span data-de>Live</span><span data-fr>En direct</span></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============== TRUST ============== -->
+<section class="trust">
+  <div class="wrap">
+    <div class="trust-grid">
+      <div class="label">
+        <span data-de>Integriert mit den führenden Schweizer Marktplätzen &amp; Shop-Systemen</span>
+        <span data-fr>Intégré aux principales marketplaces et e-shops suisses</span>
+      </div>
+      <div class="trust-logos">
+        <span class="logo-i">Digitec<sup>Galaxus</sup></span>
+        <span class="logo-i" style="font-style:italic">Brack.ch</span>
+        <span class="logo-i">Alltron</span>
+        <span class="logo-i" style="letter-spacing:.04em">amazon</span>
+        <span class="logo-i">Decathlon</span>
+        <span class="logo-i" style="font-style:italic">Shopify</span>
+        <span class="logo-i">WooCommerce</span>
+        <span class="logo-i">Mercanto</span>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============== PROBLEM ============== -->
+<section class="block problem" id="problem">
+  <div class="wrap">
+    <div class="section-head reveal">
+      <span class="num">01</span>
+      <div class="lead">
+        <span class="eyebrow"><span class="dot"></span><span data-de>Das Problem</span><span data-fr>Le problème</span></span>
+        <h2>
+          <span data-de>Bestand stimmt nie. Pickwege sind chaotisch. Marktplätze laufen aus dem Ruder.</span>
+          <span data-fr>Le stock ne correspond jamais. Les trajets sont chaotiques. Les marketplaces dérapent.</span>
+        </h2>
+        <p class="desc">
+          <span data-de>Wir haben über 40 Schweizer KMU beim Aufräumen ihres Lagers begleitet. Vier Schmerzpunkte hören wir immer wieder — und genau dafür wurde Gäbig gebaut.</span>
+          <span data-fr>Nous avons accompagné plus de 40 PME suisses dans la réorganisation de leur entrepôt. Quatre douleurs reviennent systématiquement — Gäbig a été conçu pour y répondre.</span>
+        </p>
+      </div>
+    </div>
+
+    <div class="pain-grid">
+      <div class="pain reveal">
+        <div class="ic">∅</div>
+        <span class="tag" data-de>Häufig</span><span class="tag" data-fr>Fréquent</span>
+        <h3 data-de>Doppelte Buchhaltung</h3>
+        <h3 data-fr>Comptabilité double</h3>
+        <p data-de>Shop sagt 12 Stück, Excel sagt 8, im Regal stehen 6. Inventur jedes Quartal — und trotzdem stimmt's am Montag schon nicht mehr.</p>
+        <p data-fr>Le shop dit 12, Excel dit 8, et il en reste 6 en rayon. Inventaire chaque trimestre — et lundi ça ne colle déjà plus.</p>
+      </div>
+
+      <div class="pain reveal">
+        <div class="ic">↯</div>
+        <span class="tag" data-de>Teuer</span><span class="tag" data-fr>Coûteux</span>
+        <h3 data-de>Pickwege ohne Logik</h3>
+        <h3 data-fr>Picking sans logique</h3>
+        <p data-de>Lagerist läuft den ganzen Tag zwischen A-01 und H-12 hin und her. 6km pro Schicht sind keine Seltenheit. Das kostet — und ermüdet.</p>
+        <p data-fr>Le magasinier court entre A-01 et H-12 toute la journée. 6 km par poste, c'est courant. Coûteux et épuisant.</p>
+      </div>
+
+      <div class="pain reveal">
+        <div class="ic">⚠</div>
+        <span class="tag" data-de>Risiko</span><span class="tag" data-fr>Risque</span>
+        <h3 data-de>Marktplatz-Overselling</h3>
+        <h3 data-fr>Survente marketplace</h3>
+        <p data-de>Digitec verkauft Artikel, der seit gestern nicht mehr da ist. Stornos, schlechte Bewertungen, Account-Strafen.</p>
+        <p data-fr>Digitec vend un article qui n'est plus en stock depuis hier. Annulations, mauvaises notes, sanctions.</p>
+      </div>
+
+      <div class="pain reveal">
+        <div class="ic">↻</div>
+        <span class="tag" data-de>Manuell</span><span class="tag" data-fr>Manuel</span>
+        <h3 data-de>Retouren-Chaos</h3>
+        <h3 data-fr>Chaos des retours</h3>
+        <p data-de>Wer hat's geprüft? Ist es A- oder B-Ware? Wird's gutgeschrieben? Drei Tools, vier Excel-Listen, kein klarer Status.</p>
+        <p data-fr>Qui a contrôlé ? A ou B ? Avoir émis ? Trois outils, quatre fichiers Excel, aucun statut clair.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============== FEATURES ============== -->
+<section class="block features" id="features">
+  <div class="wrap">
+    <div class="section-head reveal">
+      <span class="num">02</span>
+      <div class="lead">
+        <span class="eyebrow"><span class="dot"></span><span data-de>Funktionen</span><span data-fr>Fonctionnalités</span></span>
+        <h2 data-de>Eine Plattform. Sechs Disziplinen. Null Hardware-Lock-in.</h2>
+        <h2 data-fr>Une plateforme. Six disciplines. Zéro lock-in matériel.</h2>
+        <p class="desc">
+          <span data-de>Gäbig ist webbasiert — läuft auf jedem Smartphone, Tablet oder Browser. Bestehende Drucker, Scanner und Etiketten? Funktionieren weiter.</span>
+          <span data-fr>Gäbig est 100% web — fonctionne sur tout smartphone, tablette ou navigateur. Vos imprimantes, scanners et étiquettes existants ? Conservés.</span>
+        </p>
+      </div>
+    </div>
+
+    <div class="feat-grid">
+      <div class="feat big reveal">
+        <div class="feat-head">
+          <h3 data-de>Pick-by-Light &amp; ESL-Tags</h3>
+          <h3 data-fr>Pick-by-Light &amp; étiquettes ESL</h3>
+          <span class="num-tag">F-01</span>
+        </div>
+        <p class="feat-desc">
+          <span data-de>Der Lagerplatz blinkt. Der Lagerist greift. Fertig. ESL-Tags (eInk) auf jedem Regalplatz zeigen Artikel, Menge und Position — mehrere Picker können gleichzeitig im selben Gang arbeiten, ohne Konflikte.</span>
+          <span data-fr>L'emplacement clignote. Le magasinier saisit. Terminé. Étiquettes ESL (eInk) sur chaque emplacement — plusieurs picks simultanés sans conflit.</span>
+        </p>
+        <ul>
+          <li data-de>AI-optimierte Routen — kürzeste Laufwege</li>
+          <li data-fr>Trajets AI — chemins les plus courts</li>
+          <li data-de>Konfliktfreies Multi-User-Picking</li>
+          <li data-fr>Picking multi-utilisateur sans conflit</li>
+        </ul>
+        <div class="feat-vis">
+          <div class="vis-pickbylight">
+            <div class="shelf"><span class="light"></span></div>
+            <div class="shelf"><span class="light"></span></div>
+            <div class="shelf on"><span class="light"></span></div>
+            <div class="shelf"><span class="light"></span></div>
+            <div class="shelf"><span class="light"></span></div>
+            <div class="shelf"><span class="light"></span></div>
+            <div class="shelf"><span class="light"></span></div>
+            <div class="shelf"><span class="light"></span></div>
+          </div>
+        </div>
+      </div>
+
+      <div class="feat big reveal">
+        <div class="feat-head">
+          <h3 data-de>Live-Marktplatz-Feeds</h3>
+          <h3 data-fr>Feeds marketplace</h3>
+          <span class="num-tag">F-02</span>
+        </div>
+        <p class="feat-desc">
+          <span data-de>Bestand wird alle 15 Minuten an alle angebundenen Marktplätze gepusht. Kein Overselling, keine Stornos, keine Account-Strafen — Shop, Gäbig und Buchhaltung bleiben synchron.</span>
+          <span data-fr>Les stocks sont poussés toutes les 15 minutes à chaque marketplace connectée. Pas de survente, pas d'annulation, pas de sanction.</span>
+        </p>
+        <div class="feat-vis">
+          <div class="vis-feed">
+            <div class="row"><span><span class="x">→</span> digitec.ch</span><span class="ok">200 OK · 4 min</span></div>
+            <div class="row"><span><span class="x">→</span> brack.ch</span><span class="ok">200 OK · 7 min</span></div>
+            <div class="row"><span><span class="x">→</span> amazon.de</span><span class="ok">200 OK · 11 min</span></div>
+            <div class="row"><span><span class="x">→</span> alltron.ch</span><span class="ok">200 OK · 14 min</span></div>
+          </div>
+        </div>
+      </div>
+
+      <div class="feat reveal">
+        <div class="feat-head"><h3 data-de>PIMP — Produktdaten</h3><h3 data-fr>PIMP — Produits</h3><span class="num-tag">F-03</span></div>
+        <p class="feat-desc">
+          <span data-de>Zentrale Pflege aller Produktinformationen. Eine Quelle, alle Kanäle. Mehrsprachig mit automatischer Übersetzung.</span>
+          <span data-fr>Gestion centrale des données produits. Une source, tous les canaux. Multilingue avec traduction automatique.</span>
+        </p>
+        <div class="feat-vis"><div class="vis-langs"><span class="chip on">DE</span><span class="chip on">FR</span><span class="chip on">IT</span><span class="chip on">EN</span><span class="chip">ES</span><span class="chip">AR</span></div></div>
+      </div>
+
+      <div class="feat reveal">
+        <div class="feat-head"><h3 data-de>Auto-Versand</h3><h3 data-fr>Expédition auto</h3><span class="num-tag">F-04</span></div>
+        <p class="feat-desc">
+          <span data-de>Lieferschein, Etikett, Tracking-Mail — automatisch beim Packen. Auch Teillieferungen, auch mit Datenblättern und Anleitungen.</span>
+          <span data-fr>Bon de livraison, étiquette, mail de tracking — automatique. Livraisons partielles incluses.</span>
+        </p>
+        <div class="feat-vis"><div class="vis-flow"><div class="node">Pack</div><span class="arr">→</span><div class="node">Label</div><span class="arr">→</span><div class="node">Mail</div></div></div>
+      </div>
+
+      <div class="feat reveal">
+        <div class="feat-head"><h3 data-de>Retouren-Workflow</h3><h3 data-fr>Workflow retours</h3><span class="num-tag">F-05</span></div>
+        <p class="feat-desc">
+          <span data-de>Scannen, bewerten, gutschreiben, einlagern als B-Ware oder Lieferanten&shy;retoure — alles in einem geführten Fluss.</span>
+          <span data-fr>Scanner, évaluer, créditer, ré-entreposer en B ou retourner au fournisseur — tout dans un flux guidé.</span>
+        </p>
+        <div class="feat-vis"><div class="vis-flow"><div class="node">Scan</div><span class="arr">→</span><div class="node">A/B</div><span class="arr">→</span><div class="node">↻</div></div></div>
+      </div>
+
+      <div class="feat reveal">
+        <div class="feat-head"><h3 data-de>Item-Inventory</h3><h3 data-fr>Item-Inventory</h3><span class="num-tag">F-06</span></div>
+        <p class="feat-desc">
+          <span data-de>500m-Kabelrolle wird zu sechs 6m-Stücken. 500L Olivenöl wird zu 100 5L-Einheiten. Variable Einheiten, sauber verbucht.</span>
+          <span data-fr>Une bobine de 500m devient des morceaux de 6m. 500L d'huile deviennent 100 unités de 5L. Unités variables, comptées proprement.</span>
+        </p>
+        <div class="feat-vis">
+          <div class="vis-flow"><div class="node">500m</div><span class="arr">÷</span><div class="node">6m × 83</div></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============== HOW IT WORKS ============== -->
+<section class="block how" id="how">
+  <div class="wrap">
+    <div class="section-head reveal">
+      <span class="num">03</span>
+      <div class="lead">
+        <span class="eyebrow"><span class="dot"></span><span data-de>So funktioniert's</span><span data-fr>Fonctionnement</span></span>
+        <h2 data-de>Vom Wareneingang bis zum Wiederverkauf — vier Schritte, kein Bruch.</h2>
+        <h2 data-fr>De la réception à la revente — quatre étapes, sans rupture.</h2>
+      </div>
+    </div>
+
+    <div class="how-grid">
+      <div class="step reveal">
+        <div class="step-n">1</div>
+        <h3 data-de>Wareneingang</h3>
+        <h3 data-fr>Réception</h3>
+        <p data-de>Scan, Seriennummer erfasst, Lagerplatz automatisch zugewiesen nach A/B/C-Klassifizierung. Datenblätter sind hinterlegt.</p>
+        <p data-fr>Scan, numéro de série enregistré, emplacement attribué selon A/B/C. Fiches techniques liées.</p>
+        <div class="step-meta">~45 sek/Pos</div>
+      </div>
+
+      <div class="step reveal">
+        <div class="step-n">2</div>
+        <h3 data-de>Bestellung &amp; Pick</h3>
+        <h3 data-fr>Commande &amp; pick</h3>
+        <p data-de>Bestellung kommt aus Shop / Marktplatz / AI-Chat. Pick-Route wird berechnet. ESL-Tag blinkt am Regalplatz.</p>
+        <p data-fr>Commande venant du shop / marketplace / chat AI. Route calculée. ESL clignote.</p>
+        <div class="step-meta">Pick-by-Light · auto</div>
+      </div>
+
+      <div class="step reveal">
+        <div class="step-n">3</div>
+        <h3 data-de>Pack &amp; Versand</h3>
+        <h3 data-fr>Pack &amp; expédition</h3>
+        <p data-de>Lieferschein, Etikett mit Tracking, Anleitungen — automatischer Druck. Kundenmail geht raus, sobald das Paket im Karton ist.</p>
+        <p data-fr>Bon de livraison, étiquette avec tracking, notices — impression auto. Mail client envoyé.</p>
+        <div class="step-meta">Tracking · push</div>
+      </div>
+
+      <div class="step reveal">
+        <div class="step-n">4</div>
+        <h3 data-de>Reporting &amp; AI</h3>
+        <h3 data-fr>Reporting &amp; AI</h3>
+        <p data-de>Trends, Lagerhüter, Boom-Artikel. AI schlägt Nachbestellungen vor, Du bestätigst per Telegram.</p>
+        <p data-fr>Tendances, dormants, top-articles. L'AI suggère les réassorts, validation par Telegram.</p>
+        <div class="step-meta">Live · 24/7</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============== SCREENSHOTS ============== -->
+<section class="block shots" id="screenshots">
+  <div class="wrap">
+    <div class="section-head reveal">
+      <span class="num">04</span>
+      <div class="lead">
+        <span class="eyebrow"><span class="dot"></span><span data-de>Produkt</span><span data-fr>Produit</span></span>
+        <h2 data-de>Drei Bildschirme, die Du jeden Tag siehst.</h2>
+        <h2 data-fr>Trois écrans que vous verrez chaque jour.</h2>
+        <p class="desc">
+          <span data-de>Bestellungen, Picklist, Lager. Klicken zum Wechseln.</span>
+          <span data-fr>Commandes, picklist, stock. Cliquez pour changer.</span>
+        </p>
+      </div>
+    </div>
+
+    <div class="shots-stack" id="shotsStack">
+      <!-- shot 1: orders -->
+      <div class="shot" data-shot="0">
+        <div class="shot-nav"><span class="d r"></span><span class="d y"></span><span class="d g"></span><span class="title"><span data-de>Bestellungen · gäbig</span><span data-fr>Commandes · gäbig</span></span></div>
+        <div class="shot-body">
+          <div class="shot-grid">
+            <div class="sd">
+              <div class="lbl"><span data-de>Verkauf</span><span data-fr>Ventes</span></div>
+              <div class="it on"><span data-de>Bestellungen</span><span data-fr>Commandes</span></div>
+              <div class="it">Picklist</div>
+              <div class="it"><span data-de>Versand</span><span data-fr>Expédition</span></div>
+              <div class="it"><span data-de>Retouren</span><span data-fr>Retours</span></div>
+              <div class="lbl" style="margin-top:8px"><span data-de>Lager</span><span data-fr>Entrepôt</span></div>
+              <div class="it"><span data-de>Bestand</span><span data-fr>Stock</span></div>
+              <div class="it"><span data-de>Lagerplätze</span><span data-fr>Emplacements</span></div>
+              <div class="it"><span data-de>Inventur</span><span data-fr>Inventaire</span></div>
+            </div>
+            <div class="sb">
+              <div style="display:flex;justify-content:space-between;align-items:end">
+                <div>
+                  <h6 data-de>Bestellungen</h6><h6 data-fr>Commandes</h6>
+                  <div class="sub" data-de>128 heute · 42 offen · CHF 38'420</div>
+                  <div class="sub" data-fr>128 aujourd'hui · 42 ouvertes · CHF 38'420</div>
+                </div>
+                <div class="ord-toolbar">
+                  <div class="filt on"><span data-de>Heute</span><span data-fr>Aujourd'hui</span></div><div class="filt"><span data-de>Diese Woche</span><span data-fr>Cette semaine</span></div><div class="filt"><span data-de>Alle</span><span data-fr>Tous</span></div>
+                  <div class="new"><span data-de>+ Neu</span><span data-fr>+ Nouveau</span></div>
+                </div>
+              </div>
+              <div class="ord-table">
+                <div class="head"><span data-de>Datum</span><span data-fr>Date</span><span data-de>Kunde</span><span data-fr>Client</span><span>Status</span><span>Total</span><span>SLA</span></div>
+                <div class="row"><span class="meta-s">12.05 09:42</span><span class="name"><span class="av" style="background:#92F48C">MA</span>Müller AG</span><span><span class="mock-pill ok"><span class="pdot"></span>Paid</span></span><span class="meta-s">CHF 248.00</span><span class="meta-s">2h 14m</span></div>
+                <div class="row"><span class="meta-s">12.05 09:18</span><span class="name"><span class="av" style="background:#FFCA6E">BR</span>Bäckerei Roth</span><span><span class="mock-pill warn"><span class="pdot"></span>Open</span></span><span class="meta-s">CHF 89.50</span><span class="meta-s">4h 02m</span></div>
+                <div class="row"><span class="meta-s">11.05 16:51</span><span class="name"><span class="av" style="background:#FF7CB5">GK</span>Garage Keller</span><span><span class="mock-pill info"><span class="pdot"></span>Ship</span></span><span class="meta-s">CHF 1'204.00</span><span class="meta-s">24h 38m</span></div>
+                <div class="row"><span class="meta-s">11.05 14:22</span><span class="name"><span class="av" style="background:#9DE4F2">AT</span>Atelier Tobler</span><span><span class="mock-pill ok"><span class="pdot"></span>Paid</span></span><span class="meta-s">CHF 412.80</span><span class="meta-s">6h 11m</span></div>
+                <div class="row"><span class="meta-s">11.05 11:09</span><span class="name"><span class="av" style="background:#FDF169">SG</span>Schreinerei Gerber</span><span><span class="mock-pill warn"><span class="pdot"></span>Open</span></span><span class="meta-s">CHF 678.40</span><span class="meta-s">9h 24m</span></div>
+                <div class="row"><span class="meta-s">11.05 09:33</span><span class="name"><span class="av" style="background:#FF8F6A">LB</span>Lüthi Bau AG</span><span><span class="mock-pill ok"><span class="pdot"></span>Paid</span></span><span class="meta-s">CHF 2'104.20</span><span class="meta-s">11h 00m</span></div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- shot 2: picklist -->
+      <div class="shot" data-shot="1" style="display:none">
+        <div class="shot-nav"><span class="d r"></span><span class="d y"></span><span class="d g"></span><span class="title">Picklist · gäbig</span></div>
+        <div class="shot-body">
+          <div class="shot-grid">
+            <div class="sd">
+              <div class="lbl"><span data-de>Verkauf</span><span data-fr>Ventes</span></div>
+              <div class="it"><span data-de>Bestellungen</span><span data-fr>Commandes</span></div>
+              <div class="it on">Picklist</div>
+              <div class="it"><span data-de>Versand</span><span data-fr>Expédition</span></div>
+              <div class="it"><span data-de>Retouren</span><span data-fr>Retours</span></div>
+              <div class="lbl" style="margin-top:8px"><span data-de>Lager</span><span data-fr>Entrepôt</span></div>
+              <div class="it"><span data-de>Bestand</span><span data-fr>Stock</span></div>
+              <div class="it"><span data-de>Lagerplätze</span><span data-fr>Emplacements</span></div>
+            </div>
+            <div class="sb">
+              <div style="display:flex;justify-content:space-between;align-items:end">
+                <div>
+                  <h6 data-de>Pick-Route #418</h6><h6 data-fr>Tournée #418</h6>
+                  <div class="sub"><span data-de>SO-10428 · Müller AG · 6 Positionen</span><span data-fr>SO-10428 · Müller AG · 6 positions</span></div>
+                </div>
+                <div class="ord-toolbar">
+                  <div class="filt on">Pick</div><div class="filt">Pause</div>
+                  <div class="new" data-de>Fertig</div><div class="new" data-fr>Terminé</div>
+                </div>
+              </div>
+              <div class="pick-grid">
+                <div class="pick-list">
+                  <div class="pick-item done"><div class="chk"></div><div class="info"><div class="t">Schraubenset M6</div><div class="s">SKU-449128 · 50 Stk</div></div><div class="loc">A-01-04</div></div>
+                  <div class="pick-item done"><div class="chk"></div><div class="info"><div class="t">Dichtung 40mm</div><div class="s">SKU-228130 · 12 Stk</div></div><div class="loc">A-03-08</div></div>
+                  <div class="pick-item active"><div class="chk"></div><div class="info"><div class="t" data-de>Kabel HDMI 2m · Pick jetzt</div><div class="t" data-fr>Câble HDMI 2m · Pick maintenant</div><div class="s">SKU-991022 · 1 Stk</div></div><div class="loc">B-04-12</div></div>
+                  <div class="pick-item"><div class="chk"></div><div class="info"><div class="t">Bohrkrone 20mm</div><div class="s">SKU-101782 · 1 Stk</div></div><div class="loc">B-07-03</div></div>
+                  <div class="pick-item"><div class="chk"></div><div class="info"><div class="t">Holzschutzlasur 5L</div><div class="s">SKU-882244 · 2 Stk</div></div><div class="loc">D-02-11</div></div>
+                  <div class="pick-item"><div class="chk"></div><div class="info"><div class="t">Pinsel-Set Premium</div><div class="s">SKU-665544 · 1 Stk</div></div><div class="loc">D-04-02</div></div>
+                </div>
+                <div class="pick-side">
+                  <h6 data-de>Routenkarte</h6><h6 data-fr>Carte</h6>
+                  <div class="pick-map">
+                    <div class="cell start">S</div><div class="cell path"></div><div class="cell">A2</div><div class="cell">A3</div><div class="cell">A4</div>
+                    <div class="cell">B1</div><div class="cell path"></div><div class="cell">B3</div><div class="cell stop">B4</div><div class="cell">B5</div>
+                    <div class="cell">C1</div><div class="cell">C2</div><div class="cell path"></div><div class="cell path"></div><div class="cell">C5</div>
+                    <div class="cell">D1</div><div class="cell stop">D2</div><div class="cell">D3</div><div class="cell stop">D4</div><div class="cell">D5</div>
+                  </div>
+                  <div style="display:flex;justify-content:space-between;font-size:11px;color:var(--n-600);font-family:ui-monospace,monospace">
+                    <span>0,4 km</span><span style="color:var(--b-700);font-weight:700">~8 min</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- shot 3: inventory -->
+      <div class="shot" data-shot="2" style="display:none">
+        <div class="shot-nav"><span class="d r"></span><span class="d y"></span><span class="d g"></span><span class="title"><span data-de>Bestand · gäbig</span><span data-fr>Stock · gäbig</span></span></div>
+        <div class="shot-body">
+          <div class="shot-grid">
+            <div class="sd">
+              <div class="lbl"><span data-de>Verkauf</span><span data-fr>Ventes</span></div>
+              <div class="it"><span data-de>Bestellungen</span><span data-fr>Commandes</span></div>
+              <div class="it">Picklist</div>
+              <div class="it"><span data-de>Versand</span><span data-fr>Expédition</span></div>
+              <div class="lbl" style="margin-top:8px"><span data-de>Lager</span><span data-fr>Entrepôt</span></div>
+              <div class="it on"><span data-de>Bestand</span><span data-fr>Stock</span></div>
+              <div class="it"><span data-de>Lagerplätze</span><span data-fr>Emplacements</span></div>
+              <div class="it"><span data-de>Inventur</span><span data-fr>Inventaire</span></div>
+            </div>
+            <div class="sb" style="gap:14px">
+              <div style="display:flex;justify-content:space-between;align-items:end">
+                <div>
+                  <h6 data-de>Bestand · Übersicht</h6><h6 data-fr>Stock · vue d'ensemble</h6>
+                  <div class="sub" data-de>4'218 Artikel · 12 Lager · letztes Update vor 28s</div>
+                  <div class="sub" data-fr>4'218 articles · 12 entrepôts · MAJ il y a 28s</div>
+                </div>
+                <div class="ord-toolbar">
+                  <div class="filt on"><span data-de>Alle</span><span data-fr>Tous</span></div><div class="filt"><span data-de>Tief</span><span data-fr>Bas</span></div><div class="filt">Boom</div>
+                </div>
+              </div>
+              <div class="inv-stats">
+                <div class="inv-stat"><div class="l"><span data-de>SKU aktiv</span><span data-fr>SKU actifs</span></div><div class="v">4'218</div><div class="d"><span data-de>+24 diese Woche</span><span data-fr>+24 cette semaine</span></div></div>
+                <div class="inv-stat"><div class="l"><span data-de>Wert CHF</span><span data-fr>Valeur CHF</span></div><div class="v">1.42M</div><div class="d">+3.2%</div></div>
+                <div class="inv-stat"><div class="l"><span data-de>Lagerhüter</span><span data-fr>Dormants</span></div><div class="v">142</div><div class="d neg"><span data-de>> 180 Tage</span><span data-fr>> 180 jours</span></div></div>
+                <div class="inv-stat"><div class="l"><span data-de>Boom-Artikel</span><span data-fr>Top articles</span></div><div class="v">38</div><div class="d">↑ AI flag</div></div>
+              </div>
+              <div class="inv-chart">
+                <div style="display:flex;justify-content:space-between;align-items:center">
+                  <h6 data-de>Verkäufe vs. Bestand · letzte 8 Wochen</h6>
+                  <h6 data-fr>Ventes vs. stock · 8 dernières semaines</h6>
+                  <div style="display:flex;gap:14px;font-size:10.5px;color:var(--n-600);font-family:ui-monospace,monospace">
+                    <span style="display:flex;align-items:center;gap:6px"><span style="width:8px;height:8px;background:var(--b-500);border-radius:2px"></span><span data-de>Verkäufe</span><span data-fr>Ventes</span></span>
+                    <span style="display:flex;align-items:center;gap:6px"><span style="width:8px;height:8px;background:var(--p-c);border-radius:2px"></span><span data-de>Bestand</span><span data-fr>Stock</span></span>
+                  </div>
+                </div>
+                <div class="inv-bars">
+                  <div class="bar" style="height:40%" data-l="W1"></div>
+                  <div class="bar alt" style="height:58%" data-l="W1"></div>
+                  <div class="bar" style="height:48%" data-l="W2"></div>
+                  <div class="bar alt" style="height:52%" data-l="W2"></div>
+                  <div class="bar" style="height:62%" data-l="W3"></div>
+                  <div class="bar alt" style="height:46%" data-l="W3"></div>
+                  <div class="bar" style="height:71%" data-l="W4"></div>
+                  <div class="bar alt" style="height:38%" data-l="W4"></div>
+                  <div class="bar" style="height:64%" data-l="W5"></div>
+                  <div class="bar alt" style="height:44%" data-l="W5"></div>
+                  <div class="bar" style="height:80%" data-l="W6"></div>
+                  <div class="bar alt" style="height:36%" data-l="W6"></div>
+                  <div class="bar" style="height:88%" data-l="W7"></div>
+                  <div class="bar alt" style="height:30%" data-l="W7"></div>
+                  <div class="bar" style="height:96%" data-l="W8"></div>
+                  <div class="bar alt" style="height:22%" data-l="W8"></div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="shots-controls">
+      <button class="active" data-go="0" aria-label="Bestellungen"></button>
+      <button data-go="1" aria-label="Picklist"></button>
+      <button data-go="2" aria-label="Bestand"></button>
+    </div>
+  </div>
+</section>
+
+<!-- ============== AI CHAT ============== -->
+<section class="block aichat" id="aichat">
+  <div class="wrap">
+    <div class="ai-grid">
+      <div class="ai-copy reveal">
+        <span class="eyebrow" style="margin-bottom:18px;display:inline-flex"><span class="dot"></span><span data-de>AI-Chat</span><span data-fr>Chat AI</span></span>
+        <h2 data-de>Frag Dein Lager. Per Telegram.</h2>
+        <h2 data-fr>Demande à ton stock. Sur Telegram.</h2>
+        <p class="desc">
+          <span data-de>Kein neues Tool, kein zusätzlicher Login. Gäbig spricht Telegram nativ — Bestände abfragen, Bestellungen erfassen, Status nachvollziehen. Auch unterwegs, auch beim Kunden.</span>
+          <span data-fr>Pas de nouvel outil, pas de login supplémentaire. Gäbig parle Telegram nativement — stocks, commandes, statuts. Même en déplacement.</span>
+        </p>
+        <div class="channels">
+          <div class="channel"><span class="d"></span>Telegram</div>
+        </div>
+        <ul class="commands">
+          <li><code>/stock SKU</code><span data-de>Bestand &amp; Lagerplatz abfragen</span><span data-fr>Consulter stock &amp; emplacement</span></li>
+          <li><code>/order</code><span data-de>Neue Bestellung erfassen, geführter Flow</span><span data-fr>Nouvelle commande, flux guidé</span></li>
+          <li><code>/track #</code><span data-de>Tracking-Status + ETA für Kunden</span><span data-fr>Statut + ETA pour le client</span></li>
+          <li><code>/top 7d</code><span data-de>Bestseller der letzten 7 Tage</span><span data-fr>Best-sellers 7 derniers jours</span></li>
+        </ul>
+      </div>
+
+      <div class="ai-phone reveal">
+        <div class="ai-head">
+          <div class="av">G</div>
+          <div>
+            <div class="n">Gäbig Assistant</div>
+            <div class="s" data-de>online · antwortet sofort</div>
+            <div class="s" data-fr>en ligne · répond rapidement</div>
+          </div>
+        </div>
+        <div class="ai-body">
+          <div class="bubble me" data-de>Hallo, wieviele Bohrkronen 20mm haben wir noch?<span class="ts">09:42</span></div>
+          <div class="bubble me" data-fr>Bonjour, combien de carottes 20mm restent ?<span class="ts">09:42</span></div>
+          <div class="bubble ai" data-de>
+            <strong style="color:var(--b-900)">42 Stk</strong> auf Lager · Position <code>B-07-03</code><br/>
+            Verkauf letzte 7 Tage: 8 Stk. Reichweite ~37 Tage.
+            <div class="meta">
+              <strong>AI-Vorschlag:</strong><br/>
+              Nachbestellung 50 Stk bei Hilti? Lieferzeit 4 Tage.
+            </div>
+            <span class="ts">09:42</span>
+          </div>
+          <div class="bubble ai" data-fr>
+            <strong style="color:var(--b-900)">42 pièces</strong> en stock · emplacement <code>B-07-03</code><br/>
+            Ventes 7 derniers jours : 8. Couverture ~37 jours.
+            <div class="meta">
+              <strong>Suggestion AI :</strong><br/>
+              Réassort 50 pcs chez Hilti ? Délai 4 jours.
+            </div>
+            <span class="ts">09:42</span>
+          </div>
+          <div class="bubble me" data-de>Ja, bestell 50.<span class="ts">09:43</span></div>
+          <div class="bubble me" data-fr>Oui, commande 50.<span class="ts">09:43</span></div>
+          <div class="bubble ai" data-de>
+            ✓ Bestellung <code>PO-2204</code> bei Hilti AG ausgelöst<br/>
+            Lieferung erwartet: <strong style="color:var(--b-900)">Fr, 17.05.</strong>
+            <span class="ts">09:43</span>
+          </div>
+          <div class="bubble ai" data-fr>
+            ✓ Commande <code>PO-2204</code> envoyée à Hilti AG<br/>
+            Livraison prévue : <strong style="color:var(--b-900)">ven. 17.05.</strong>
+            <span class="ts">09:43</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============== SWISS ============== -->
+<section class="block swiss" id="swiss">
+  <div class="wrap">
+    <div class="swiss-grid">
+      <div class="swiss-copy reveal">
+        <span class="eyebrow" style="margin-bottom:18px;display:inline-flex"><span class="dot"></span><span data-de>Über uns</span><span data-fr>À propos</span></span>
+        <h2 data-de>Entwickelt in <span class="accent">Oetwil am See</span>. Betreut von Menschen, die ans Telefon gehen.</h2>
+        <h2 data-fr>Développé à <span class="accent">Oetwil am See</span>. Soutenu par des humains qui décrochent.</h2>
+        <p data-de>Gäbig ist eine Schweizer Software, gebaut für Schweizer Lager. Wir verstehen Mehrwertsteuer, A-Post, B-Post, Galaxus-Schnittstellen und warum Du einen Brother QL-820 statt eines Zebra brauchst.</p>
+        <p data-fr>Gäbig est un logiciel suisse, conçu pour des entrepôts suisses. Nous comprenons la TVA, A-Post, B-Post, les API Galaxus et pourquoi vous préférez un Brother QL-820 à un Zebra.</p>
+        <p data-de>Kein Call-Center in Bangalore. Kein Ticket-System mit 72h-SLA. Wenn etwas brennt, ruf an.</p>
+        <p data-fr>Pas de call-center à Bangalore. Pas de ticket à SLA 72h. Si ça brûle, appelez.</p>
+
+        <div class="swiss-facts">
+          <div class="swiss-fact"><div class="l" data-de>Gegründet</div><div class="l" data-fr>Fondée</div><div class="v">2022</div></div>
+          <div class="swiss-fact"><div class="l" data-de>Hosting</div><div class="l" data-fr>Hébergement</div><div class="v" data-comment-anchor="bb571ede38-div">100% EU</div></div>
+          <div class="swiss-fact"><div class="l" data-de>Support-Antwort</div><div class="l" data-fr>Réponse support</div><div class="v">&lt; 2h</div></div>
+          <div class="swiss-fact"><div class="l" data-de>Sprachen</div><div class="l" data-fr>Langues</div><div class="v">6</div></div>
+        </div>
+      </div>
+
+      <div class="swiss-map reveal">
+        <div class="ch-cross"></div>
+        <div class="top-l">
+          <div class="pin">
+            <span class="d"></span>
+            <span data-de>Industriestrasse 8, Oetwil am See</span>
+            <span data-fr>Industriestrasse 8, Oetwil am See</span>
+          </div>
+        </div>
+        <div class="bottom">
+          <span data-de>Swiss made.</span>
+          <span data-fr>Swiss made.</span>
+          <strong>Gäbig.</strong>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============== DEMO ============== -->
+<section class="block demo" id="demo">
+  <div class="wrap">
+    <div class="demo-grid">
+      <div class="demo-copy reveal">
+        <span class="eyebrow" style="margin-bottom:18px;display:inline-flex"><span class="dot"></span><span data-de>Demo buchen</span><span data-fr>Réserver une démo</span></span>
+        <h2 data-de>30 Minuten. Dein Lager. Konkrete Antworten.</h2>
+        <h2 data-fr>30 minutes. Ton entrepôt. Des réponses concrètes.</h2>
+        <p class="lede" data-de>Statt eines Verkaufsgesprächs zeigen wir Gäbig live an einem Lager wie Deinem — und beantworten die schwierigen Fragen, bevor sie gestellt werden müssen.</p>
+        <p class="lede" data-fr>Au lieu d'un argumentaire, nous montrons Gäbig en direct sur un entrepôt comme le tien — et nous répondons aux questions difficiles avant qu'elles soient posées.</p>
+
+        <ul class="expect">
+          <li><span class="n">1</span><span><strong data-de>5 Min · </strong><strong data-fr>5 min · </strong><span data-de>Wir verstehen Deinen aktuellen Flow</span><span data-fr>Nous comprenons ton flux actuel</span></span></li>
+          <li><span class="n">2</span><span><strong data-de>15 Min · </strong><strong data-fr>15 min · </strong><span data-de>Live-Demo an Deinen Beispieldaten</span><span data-fr>Démo live sur tes données</span></span></li>
+          <li><span class="n">3</span><span><strong data-de>10 Min · </strong><strong data-fr>10 min · </strong><span data-de>Fragen, Preise, nächste Schritte</span><span data-fr>Questions, prix, prochaines étapes</span></span></li>
+        </ul>
+
+        <div style="margin-top:32px;padding:18px 20px;background:var(--n-100);border:1px solid var(--n-300);border-radius:10px;display:flex;gap:14px;align-items:center;max-width:440px">
+          <div style="width:36px;height:36px;border-radius:50%;background:var(--p-c);color:var(--n-900);display:flex;align-items:center;justify-content:center;font-weight:700;font-family:'Helvetica-Custom';font-size:14px">TS</div>
+          <div>
+            <div style="font-weight:700;color:var(--b-900);font-size:14px" data-de>Till Siegrist · Gründer</div>
+            <div style="font-weight:700;color:var(--b-900);font-size:14px" data-fr>Till Siegrist · Fondateur</div>
+            <div style="font-size:12px;color:var(--n-600)"><a href="tel:+41765582080" style="color:var(--b-700)">+41 76 558 20 80</a> · <a href="mailto:mail@gabig.app" style="color:var(--b-700)">mail@gabig.app</a></div>
+          </div>
+        </div>
+      </div>
+
+      <form class="demo-card reveal" onsubmit="handleSubmit(event)">
+        <h3 data-de>Demo anfragen</h3><h3 data-fr>Demander une démo</h3>
+        <p class="sub" data-de>Wir melden uns innert 2 Stunden mit drei Termin-Vorschlägen.</p>
+        <p class="sub" data-fr>Nous répondons sous 2h avec trois créneaux.</p>
+
+        <div class="form-grid">
+          <div class="field full">
+            <label data-de>Name<span class="req">*</span></label>
+            <label data-fr>Nom<span class="req">*</span></label>
+            <input type="text" name="name" required placeholder="Max Müller" />
+          </div>
+          <div class="field full">
+            <label data-de>Firma<span class="req">*</span></label>
+            <label data-fr>Société<span class="req">*</span></label>
+            <input type="text" name="company" required placeholder="Müller AG" />
+          </div>
+          <div class="field">
+            <label data-de>E-Mail<span class="req">*</span></label>
+            <label data-fr>E-mail<span class="req">*</span></label>
+            <input type="email" name="email" required placeholder="max@mueller.ch" />
+          </div>
+          <div class="field">
+            <label data-de>Telefon</label>
+            <label data-fr>Téléphone</label>
+            <input type="tel" name="phone" placeholder="+41 79 …" />
+          </div>
+          <div class="field">
+            <label data-de>Lager-Team</label>
+            <label data-fr>Équipe entrepôt</label>
+            <select name="team">
+              <option>1–3</option>
+              <option>4–10</option>
+              <option>11–25</option>
+              <option>26–50</option>
+              <option data-de>50+</option>
+            </select>
+          </div>
+          <div class="field">
+            <label data-de>Shop-System</label>
+            <label data-fr>Système e-shop</label>
+            <select name="shop">
+              <option>Shopify</option>
+              <option>WooCommerce</option>
+              <option>Magento</option>
+              <option>PrestaShop</option>
+              <option data-de>Eigene Lösung</option>
+              <option data-fr>Solution propre</option>
+              <option data-de>Noch keine</option>
+              <option data-fr>Pas encore</option>
+            </select>
+          </div>
+          <div class="field full">
+            <label data-de>Was ist im Moment Deine grösste Hürde?</label>
+            <label data-fr>Quel est ton plus gros défi actuellement ?</label>
+            <textarea name="msg" rows="3" placeholder="Pickwege, Marktplatz-Sync, Retouren …"></textarea>
+          </div>
+        </div>
+
+        <div class="form-submit">
+          <button type="submit" class="btn-primary">
+            <span data-de>Demo anfragen</span><span data-fr>Demander la démo</span>
+            <span style="font-size:18px;line-height:1">→</span>
+          </button>
+          <div class="fine">
+            <span data-de>Mit dem Senden stimmst Du unserer </span>
+            <span data-fr>En envoyant, tu acceptes notre </span>
+            <a href="#" style="color:var(--b-700);text-decoration:underline" data-de>Datenschutzerklärung</a>
+            <a href="#" style="color:var(--b-700);text-decoration:underline" data-fr>politique de confidentialité</a>
+            <span data-de> zu. Kein Spam, versprochen.</span>
+            <span data-fr>. Pas de spam, promis.</span>
+          </div>
+        </div>
+      </form>
+    </div>
+  </div>
+</section>
+
+<!-- ============== FOOTER ============== -->
+<footer>
+  <div class="wrap">
+    <div class="foot-grid">
+      <div class="brand-blk">
+        <div class="lg">
+          <span class="mark"><svg viewBox="0 0 29 42" xmlns="http://www.w3.org/2000/svg"><path d="M15.39 10.7C22.9 10.7 26.68 14.6 26.68 14.6L23.23 19.98C23.23 19.98 20.23 17.27 16.09 17.27C9.93 17.27 7.43 21.21 7.43 25.56C7.43 31.14 11.29 34.47 15.85 34.47C19.3 34.47 21.8 32.34 21.8 32.34V30.08H17.65V23.96H28.16V40.55H22.17V39.73C22.17 39.11 22.21 38.5 22.21 38.5H22.13C22.13 38.5 19.3 41.05 14.41 41.05C6.9 41.05 0 35.43 0 25.82C0 17.28 6.45 10.71 15.39 10.71V10.7Z"/><path d="M27.72 4.32996V6.54996H1.71997V4.32996H27.72Z"/><path d="M27.72 0V2.22H1.71997V0H27.72Z"/></svg></span>
+          <span style="font-family:'Helvetica-Custom';font-weight:700;font-size:24px;color:var(--n-100);letter-spacing:-.02em">gäbig</span>
+        </div>
+        <p data-de>AI-Lagerlogistik aus der Schweiz. Einfach. Smart. Gäbig.</p>
+        <p data-fr>Logistique d'entrepôt AI, made in Switzerland. Simple. Smart. Gäbig.</p>
+        <address class="addr">
+          Gäbig GmbH<br/>
+          Industriestrasse 8<br/>
+          8618 Oetwil am See<br/>
+          <a href="tel:+41765582080">+41 76 558 20 80</a><br/>
+          <a href="mailto:mail@gabig.app">mail@gabig.app</a>
+        </address>
+      </div>
+
+      <div>
+        <h5 data-de>Produkt</h5><h5 data-fr>Produit</h5>
+        <ul>
+          <li><a href="#features" data-de>Funktionen</a><a href="#features" data-fr>Fonctions</a></li>
+          <li><a href="#how" data-de>So funktioniert's</a><a href="#how" data-fr>Fonctionnement</a></li>
+          <li><a href="#screenshots" data-de>Produkt-Screens</a><a href="#screenshots" data-fr>Captures</a></li>
+          <li><a href="#aichat">AI-Chat</a></li>
+          <li><a href="#" data-de>Integrationen</a><a href="#" data-fr>Intégrations</a></li>
+        </ul>
+      </div>
+
+      <div>
+        <h5 data-de>Unternehmen</h5><h5 data-fr>Société</h5>
+        <ul>
+          <li><a href="#swiss" data-de>Über uns</a><a href="#swiss" data-fr>À propos</a></li>
+          <li><a href="#demo">Demo</a></li>
+          <li><a href="mailto:mail@gabig.app">Kontakt</a></li>
+        </ul>
+      </div>
+
+      <div>
+        <h5 data-de>Rechtliches</h5><h5 data-fr>Mentions</h5>
+        <ul>
+          <li><a href="#" data-de>Datenschutz</a><a href="#" data-fr>Confidentialité</a></li>
+          <li><a href="#" data-de>AGB</a><a href="#" data-fr>CGV</a></li>
+          <li><a href="#" data-de>Impressum</a><a href="#" data-fr>Mentions légales</a></li>
+          <li><a href="#" data-de>SLA &amp; Support</a><a href="#" data-fr>SLA &amp; support</a></li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="foot-bottom">
+      <div>© 2026 Gäbig GmbH. <span data-de>Alle Rechte vorbehalten.</span><span data-fr>Tous droits réservés.</span></div>
+      <div class="badges">
+        <span>Swiss made</span>
+        <span>Hosted in EU</span>
+      </div>
+    </div>
+  </div>
+</footer>
+
+<script>
+  // ============== language toggle ==============
+  const langButtons = document.querySelectorAll('nav.top .lang button');
+  langButtons.forEach(b => b.addEventListener('click', () => {
+    const lang = b.dataset.lang;
+    document.documentElement.setAttribute('lang', lang);
+    langButtons.forEach(x => x.classList.toggle('active', x === b));
+    try{ localStorage.setItem('gabig.lang', lang); }catch(e){}
+  }));
+  try{
+    const saved = localStorage.getItem('gabig.lang');
+    if(saved){
+      document.documentElement.setAttribute('lang', saved);
+      langButtons.forEach(b => b.classList.toggle('active', b.dataset.lang === saved));
+    }
+  }catch(e){}
+
+  // ============== nav scrolled state ==============
+  const nav = document.getElementById('topNav');
+  const onScroll = () => nav.classList.toggle('scrolled', window.scrollY > 12);
+  window.addEventListener('scroll', onScroll, {passive:true});
+  onScroll();
+
+  // ============== reveal on scroll ==============
+  const io = new IntersectionObserver((entries) => {
+    entries.forEach(e => { if(e.isIntersecting){ e.target.classList.add('in'); io.unobserve(e.target); } });
+  }, {threshold:.1, rootMargin:'0px 0px -40px 0px'});
+  document.querySelectorAll('.reveal').forEach(el => io.observe(el));
+
+  // ============== screenshots carousel ==============
+  const shots = document.querySelectorAll('.shot');
+  const ctrls = document.querySelectorAll('.shots-controls button');
+  let activeShot = 0;
+  function goShot(i){
+    activeShot = i;
+    shots.forEach((s, idx) => { s.style.display = idx === i ? 'block' : 'none'; });
+    ctrls.forEach((c, idx) => c.classList.toggle('active', idx === i));
+  }
+  ctrls.forEach((c, i) => c.addEventListener('click', () => goShot(i)));
+  shots.forEach((s, i) => s.addEventListener('click', () => goShot((i + 1) % shots.length)));
+
+  // auto-advance every 6s
+  setInterval(() => goShot((activeShot + 1) % shots.length), 6500);
+
+  // ============== form ==============
+  function handleSubmit(e){
+    e.preventDefault();
+    const form = e.target;
+    const btn = form.querySelector('button[type=submit]');
+    const lang = document.documentElement.getAttribute('lang') || 'de';
+    btn.disabled = true;
+    btn.innerHTML = lang === 'fr'
+      ? '<span>Envoi en cours…</span>'
+      : '<span>Wird gesendet…</span>';
+    setTimeout(() => {
+      form.innerHTML = `
+        <div style="display:flex;flex-direction:column;align-items:center;text-align:center;gap:14px;padding:32px 0">
+          <div style="width:54px;height:54px;border-radius:50%;background:var(--p-a-100);color:#1f5a18;display:flex;align-items:center;justify-content:center;font-size:26px;font-weight:700">✓</div>
+          <h3 style="margin:0">${lang === 'fr' ? 'Merci !' : 'Danke!'}</h3>
+          <p style="font-size:15px;color:var(--n-600);max-width:340px;line-height:1.5">
+            ${lang === 'fr'
+              ? "Nous t'envoyons trois créneaux dans les 2 prochaines heures à l'adresse indiquée."
+              : 'Wir senden Dir innert 2 Stunden drei Termin-Vorschläge an die angegebene E-Mail.'}
+          </p>
+          <p style="font-size:12px;color:var(--n-500)">
+            ${lang === 'fr' ? 'Urgent ? ' : 'Eilig? '}
+            <a href="tel:+41765582080" style="color:var(--b-700);font-weight:700">+41 76 558 20 80</a>
+          </p>
+        </div>`;
+    }, 700);
+  }
+</script>
+
+</body>
+</html>
