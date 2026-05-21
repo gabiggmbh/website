@@ -267,6 +267,17 @@
   .step p{font-size:13.5px;color:var(--n-600);line-height:1.5}
   .step .step-meta{font-size:11px;color:var(--n-500);font-family:ui-monospace,monospace;letter-spacing:.04em;margin-top:auto;padding-top:8px;border-top:1px dashed var(--n-300)}
 
+  /* ============== videos ============== */
+  section.videos{background:var(--egg-200)}
+  .videos-grid{display:grid;grid-template-columns:1fr 1fr;gap:32px}
+  .video-card{display:flex;flex-direction:column;gap:16px}
+  .video-wrap{position:relative;padding-bottom:56.25%;height:0;overflow:hidden;border-radius:12px;background:var(--n-800);box-shadow:var(--shadow-soft)}
+  .video-wrap iframe{position:absolute;top:0;left:0;width:100%;height:100%;border:0}
+  .video-card .vc-label{font-size:11px;text-transform:uppercase;letter-spacing:.14em;color:var(--b-500);font-weight:700}
+  .video-card h3{font-size:20px;color:var(--b-900)}
+  .video-card p{font-size:14px;color:var(--n-600);line-height:1.5}
+  @media(max-width:768px){.videos-grid{grid-template-columns:1fr}}
+
   /* ============== screenshots ============== */
   section.shots{background:var(--egg-200);overflow:hidden}
   .shots-stack{position:relative;height:580px;display:flex;justify-content:center;align-items:center;padding:0 32px}
@@ -867,6 +878,44 @@
         <p data-de>Trends, Lagerhüter, Boom-Artikel. AI schlägt Nachbestellungen vor, Du bestätigst per Telegram.</p>
         <p data-fr>Tendances, dormants, top-articles. L'AI suggère les réassorts, validation par Telegram.</p>
         <div class="step-meta">Live · 24/7</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============== VIDEOS ============== -->
+<section class="block videos" id="videos">
+  <div class="wrap">
+    <div class="section-head reveal">
+      <span class="num">—</span>
+      <div class="lead">
+        <span class="eyebrow"><span class="dot"></span><span data-de>Gäbig in Aktion</span><span data-fr>Gäbig en action</span></span>
+        <h2 data-de>Sieh selbst, was Gäbig kann.</h2>
+        <h2 data-fr>Voyez par vous-même ce que Gäbig fait.</h2>
+      </div>
+    </div>
+
+    <div class="videos-grid">
+      <div class="video-card reveal">
+        <div class="video-wrap">
+          <iframe src="https://www.youtube-nocookie.com/embed/b60pfQ2oyvQ" title="Gäbig Vision" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen loading="lazy"></iframe>
+        </div>
+        <span class="vc-label"><span data-de>Vision</span><span data-fr>Vision</span></span>
+        <h3 data-de>Warum wir Gäbig gebaut haben</h3>
+        <h3 data-fr>Pourquoi nous avons créé Gäbig</h3>
+        <p data-de>Unsere Philosophie: einfache, schlaue Lagersoftware, die Schweizer KMU wirklich nutzen — ohne Implementierungsprojekt, ohne Schulungswochen.</p>
+        <p data-fr>Notre philosophie : un logiciel d'entrepôt simple et intelligent que les PME suisses utilisent vraiment — sans projet d'implémentation, sans semaines de formation.</p>
+      </div>
+
+      <div class="video-card reveal">
+        <div class="video-wrap">
+          <iframe src="https://www.youtube-nocookie.com/embed/ReVYWhu72w0" title="Gäbig Picking" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen loading="lazy"></iframe>
+        </div>
+        <span class="vc-label"><span data-de>Picking</span><span data-fr>Picking</span></span>
+        <h3 data-de>Pick-by-Light live im Lager</h3>
+        <h3 data-fr>Pick-by-Light en direct dans l'entrepôt</h3>
+        <p data-de>ESL-Tags blinken am richtigen Regalplatz, Gäbig berechnet die kürzeste Route. Weniger Wege, weniger Fehler, mehr Pakete pro Stunde.</p>
+        <p data-fr>Les étiquettes ESL clignotent au bon emplacement, Gäbig calcule le chemin optimal. Moins de trajets, moins d'erreurs, plus de colis par heure.</p>
       </div>
     </div>
   </div>
